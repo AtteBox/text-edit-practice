@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, use, useCallback, useEffect, useRef, useState } from "react";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -9,12 +9,6 @@ function isMac() {
 function ctrlEquivalentPressed(event: KeyboardEvent) {
   return isMac() ? event.altKey : event.ctrlKey;
 }
-
-type IGameState = {
-  germs?: number;
-  animals?: number;
-  currentLevel: number;
-};
 
 const germChars = ["🦠", "🕷"];
 const animalChars = [
@@ -95,7 +89,27 @@ function getDangerColor(ratio: number): string {
   return `rgb(${red}, ${green}, 0)`;
 }
 
-const levels = [
+function calcPoints(gameState: ILevelState, level: ILevel) {
+  const content = level.startContent.join("");
+  const germRatio = 1 - (gameState.germs ?? 0) / getGermCount(content);
+  const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
+  const timeRatio = -(gameState.elapsedTime / 1000) / level.targetTimeSeconds;
+  console.log('calcPoints', {germRatio, animalRatio, timeRatio, pointCoefficient: level.pointCoefficient});
+  return Math.max(Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient), 0);
+}
+
+type ILevel = {
+  title: string;
+  description: string;
+  startContent: string[];
+  allowedKeyCombinations: string[][];
+  cursorStartPos: "start" | "middle" | "end";
+  postLevelMessage: string;
+  targetTimeSeconds: number;
+  pointCoefficient: number;
+};
+
+const levels: ILevel[] = [
   {
     title: "Level 1: Control Backspace And Arrow Keys",
     description:
@@ -118,6 +132,8 @@ const levels = [
     cursorStartPos: "end",
     postLevelMessage:
       "Congratulations for passing level 1! You should also learn to sometimes release the control key before pressing the next combination and that's what we will practice in the next level.",
+    targetTimeSeconds: 60,
+    pointCoefficient: 100,
   },
   {
     title: "Level 2: Mixing Control and Normal Keys for Efficiency",
@@ -149,6 +165,8 @@ const levels = [
     cursorStartPos: "end",
     postLevelMessage:
       "Great job! You've learned to use both control and normal keys effectively. In the next level, we will introduce the delete key to help editing from left to right.",
+    targetTimeSeconds: 90,
+    pointCoefficient: 100,
   },
   {
     title: "Level 3: Control Delete, and Arrow Keys",
@@ -175,6 +193,8 @@ const levels = [
     cursorStartPos: "start",
     postLevelMessage:
       "Excellent! You've mastered using the delete key together with control for efficient text editing. In the next level, we will introduce the delete key without control to help editing within words also.",
+    targetTimeSeconds: 60,
+    pointCoefficient: 100,
   },
   {
     title:
@@ -204,6 +224,8 @@ const levels = [
     cursorStartPos: "start",
     postLevelMessage:
       "Fantastic! You've effectively master the delete key now. Next we will use all the keys you've learned so far.",
+    targetTimeSeconds: 90,
+    pointCoefficient: 100,
   },
   {
     title: "Level 5: Mastering All Editing Techniques",
@@ -246,26 +268,40 @@ const levels = [
     cursorStartPos: "middle",
     postLevelMessage:
       "Outstanding! You've mastered all the editing techniques. You're now a text editing expert!",
+    targetTimeSeconds: 120,
+    pointCoefficient: 100,
   },
 ];
 
+type ILevelState = {
+  germs?: number;
+  animals?: number;
+  startTime: number;
+  elapsedTime: number;
+};
+
+type IGameState = {
+  currentLevel: number;
+} & ILevelState;
+
+
 export default function Home() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [gameState, setGameState] = useState<IGameState>({ currentLevel: 1 });
+  const [gameState, setGameState] = useState<IGameState>({ currentLevel: 1, startTime: 0, elapsedTime: 0 });
   const level = levels[gameState.currentLevel - 1];
   const totalGerms = getGermCount(level.startContent.join(""));
   const totalAnimals = getAnimalCount(level.startContent.join(""));
   const [showLevelFinishedAnimation, setShowLevelFinishedAnimation] =
     useState(false);
 
-  const updateGameState = useCallback(() => {
+  const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     if (!textAreaRef.current) {
       return;
     }
     console.log(updateGameState, textAreaRef.current.value);
     const germs = getGermCount(textAreaRef.current.value);
     const animals = getAnimalCount(textAreaRef.current.value);
-    setGameState((state) => ({ ...state, germs, animals }));
+    setGameState((state) => ({ ...state, germs, animals, elapsedTime: new Date().getTime() - state.startTime, ...overrides }));
   }, []);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -294,24 +330,25 @@ export default function Home() {
 
   // focus the text area when the level changes
   useEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.focus();
-      switch (level.cursorStartPos) {
-        case "start":
-          textAreaRef.current.selectionStart = 0;
-          break;
-        case "middle":
-          textAreaRef.current.selectionStart = Math.floor(
-            textAreaRef.current.value.length / 2
-          );
-          break;
-        case "end":
-          textAreaRef.current.selectionStart = textAreaRef.current.value.length;
-          break;
-      }
-      updateGameState();
+    if (!textAreaRef.current) {
+      return;
     }
-  }, [level, updateGameState]);
+    textAreaRef.current.focus();
+    switch (level.cursorStartPos) {
+      case "start":
+        textAreaRef.current.selectionStart = 0;
+        break;
+      case "middle":
+        textAreaRef.current.selectionStart = Math.floor(
+          textAreaRef.current.value.length / 2
+        );
+        break;
+      case "end":
+        textAreaRef.current.selectionStart = textAreaRef.current.value.length;
+        break;
+    }
+    updateGameState({ startTime: Date.now(), elapsedTime: 0 });
+  }, [level]);
 
   // when there are no germs left, show the level finished animation
   useEffect(() => {
@@ -319,6 +356,13 @@ export default function Home() {
       setShowLevelFinishedAnimation(true);
     }
   }, [gameState.germs]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateGameState();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -358,6 +402,7 @@ export default function Home() {
               >
                 Germs: {gameState.germs}/{totalGerms}
               </p>
+              <p className="text-sm">+</p>
               <p
                 className="text-sm"
                 style={{
@@ -367,6 +412,36 @@ export default function Home() {
                 }}
               >
                 Animals: {gameState.animals}/{totalAnimals}
+              </p>
+              <p className="text-sm">+</p>
+              <p
+                className="text-sm"
+                style={{
+                  color: getDangerColor(
+                    (gameState.elapsedTime / 1000) / level.targetTimeSeconds
+                  ),
+                }}
+              >
+                Time: {Math.floor(gameState.elapsedTime / 1000)}/{level.targetTimeSeconds}s
+              </p>
+              <p className="text-sm">*</p> <p
+                className="text-sm"
+                style={{
+                  color: getDangerColor(level.pointCoefficient / 200),
+                }}
+              >
+                Difficulty: {level.pointCoefficient}
+                </p>
+              <p className="text-sm">=</p>
+              <p
+                className="text-sm"
+                style={{
+                  color: getDangerColor(
+                    (gameState.elapsedTime / 1000) / level.targetTimeSeconds
+                  ),
+                }}
+              >
+                Points: {calcPoints(gameState, level)}
               </p>
             </div>
             <textarea
