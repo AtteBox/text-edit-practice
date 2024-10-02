@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -93,9 +93,13 @@ function calcPoints(gameState: ILevelState, level: ILevel) {
   const content = level.startContent.join("");
   const germRatio = 1 - (gameState.germs ?? 0) / getGermCount(content);
   const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
-  const timeRatio = -(gameState.elapsedTime / 1000) / level.targetTimeSeconds;
+  const timeRatio = -Math.max((gameState.elapsedTime / 1000) / level.targetTimeSeconds, 0);
   console.log('calcPoints', {germRatio, animalRatio, timeRatio, pointCoefficient: level.pointCoefficient});
   return Math.max(Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient), 0);
+}
+
+function calcTotalPoints(gameState: IGameState, currentLevel: ILevel) {
+  return gameState.previousLevels.reduce((acc, levelState) => acc + calcPoints(levelState, levels[gameState.currentLevel - 2]), 0) + calcPoints(gameState, currentLevel);
 }
 
 type ILevel = {
@@ -282,12 +286,13 @@ type ILevelState = {
 
 type IGameState = {
   currentLevel: number;
+  previousLevels: ILevelState[];
 } & ILevelState;
 
 
 export default function Home() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [gameState, setGameState] = useState<IGameState>({ currentLevel: 1, startTime: 0, elapsedTime: 0 });
+  const [gameState, setGameState] = useState<IGameState>({ currentLevel: 1, startTime: 0, elapsedTime: 0, previousLevels: [] });
   const level = levels[gameState.currentLevel - 1];
   const totalGerms = getGermCount(level.startContent.join(""));
   const totalAnimals = getAnimalCount(level.startContent.join(""));
@@ -380,6 +385,12 @@ export default function Home() {
                   setGameState((state) => ({
                     ...state,
                     currentLevel: state.currentLevel + 1,
+                    previousLevels: [...state.previousLevels, {
+                      germs: state.germs,
+                      animals: state.animals,
+                      startTime: state.startTime,
+                      elapsedTime: state.elapsedTime
+                    }],
                   }));
                 }}
                 className="p-2 bg-blue-500 text-white rounded-lg"
@@ -391,7 +402,7 @@ export default function Home() {
         )}
         {!showLevelFinishedAnimation && (
           <>
-            <h1 className="text-2xl font-bold">{level.title}</h1>
+            <h1 className="text-2xl font-bold">{level.title}<span className="text-xs">Total Points: {calcTotalPoints(gameState, level)}</span></h1>
             <p className="text-sm">{level.description}</p>
             <div className="flex gap-4">
               <p
