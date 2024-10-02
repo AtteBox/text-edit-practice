@@ -298,6 +298,7 @@ export default function Home() {
   const totalAnimals = getAnimalCount(level.startContent.join(""));
   const [showLevelFinishedAnimation, setShowLevelFinishedAnimation] =
     useState(false);
+  const [currentKeyCombination, setCurrentKeyCombination] = useState<string[]|null>(null);
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     if (!textAreaRef.current) {
@@ -313,11 +314,13 @@ export default function Home() {
     console.log(e.key, e.ctrlKey, e.metaKey, e.altKey, e.shiftKey);
     for (const keyCombination of level.allowedKeyCombinations) {
       if (keyCombination.length === 1 && e.key === keyCombination[0]) {
+        setCurrentKeyCombination(keyCombination);
         // propagate the event to the base event handler, and then update the game state
         setTimeout(() => updateGameState(), 0);
         return;
       }
       if (keyCombination.length === 2) {
+        setCurrentKeyCombination(keyCombination);
         const [ctrlKey, keyName] = keyCombination;
         if (
           ctrlKey === "ctrl" &&
@@ -462,6 +465,7 @@ export default function Home() {
               defaultValue={level.startContent.join("\n")}
               className="p-2 rounded-lg resize-none text-black font-extrabold"
               onKeyDown={handleKeyDown}
+              onKeyUp={() => setCurrentKeyCombination(null)}
             ></textarea>
             <div>
               <span className="text-sm">Allowed key combinations:</span>
@@ -470,6 +474,7 @@ export default function Home() {
                   <KeyCombinationTag
                     key={keyCombination.join("-")}
                     keyCombination={keyCombination}
+                    isPressed={currentKeyCombination === keyCombination}
                   />
                 ))}
               </div>
@@ -490,7 +495,7 @@ export default function Home() {
   );
 }
 
-function KeyCombinationTag({ keyCombination }: { keyCombination: string[] }) {
+function KeyCombinationTag({ keyCombination, isPressed }: { keyCombination: string[], isPressed: boolean }) {
   const keyText: Record<string, string> = {
     ctrl: "Control",
     Backspace: "Backspace",
@@ -527,10 +532,8 @@ function KeyCombinationTag({ keyCombination }: { keyCombination: string[] }) {
   }
   return (
     <div className="inline-block m-2">
-      <span className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">
-        <span className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">
+      <span className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1" style={{backgroundColor: isPressed ? 'red': 'white'}}>
           {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
-        </span>
       </span>
       <br />
       <span className="text-xs">
