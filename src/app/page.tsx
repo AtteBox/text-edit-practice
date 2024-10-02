@@ -84,6 +84,17 @@ function getGermCount(text: string) {
   return count;
 }
 
+/**
+ * Get a color for a ratio where 0 is bad and 1 is good
+ * @param ratio number between 0-1
+ * @returns css color string
+ */
+function getDangerColor(ratio: number): string {
+  const red = 255 * Math.min(1, 2 * ratio);
+  const green = 255 * Math.min(1, 2 - 2 * ratio);
+  return `rgb(${red}, ${green}, 0)`;
+}
+
 const levels = [
   {
     title: "Level 1: Control Backspace And Arrow Keys",
@@ -339,10 +350,22 @@ export default function Home() {
             <h1 className="text-2xl font-bold">{level.title}</h1>
             <p className="text-sm">{level.description}</p>
             <div className="flex gap-4">
-              <p className="text-sm">
+              <p
+                className="text-sm"
+                style={{
+                  color: getDangerColor((gameState.germs ?? 0) / totalGerms),
+                }}
+              >
                 Germs: {gameState.germs}/{totalGerms}
               </p>
-              <p className="text-sm">
+              <p
+                className="text-sm"
+                style={{
+                  color: getDangerColor(
+                    1 - (gameState.animals ?? 0) / totalAnimals
+                  ),
+                }}
+              >
                 Animals: {gameState.animals}/{totalAnimals}
               </p>
             </div>
