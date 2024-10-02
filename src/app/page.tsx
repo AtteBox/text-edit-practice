@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { start } from "repl";
+import { KeyboardEvent, useEffect, useRef } from "react";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf('MAC')>=0;
@@ -12,6 +11,8 @@ function ctrlEquivalentPressed(event: KeyboardEvent) {
 }
 
 export default function Home() {
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const level = {
     title: "Level 1: Control Backspace And Arrow Keys",
@@ -24,25 +25,13 @@ export default function Home() {
       "🐥🦆 🦠🕷🦠 🦅🦉 🕷🕷 🦇🐺 🦠🦠🦠 🐗🐴",
       "🕷🕷🕷 🦄🐝 🦠🦠🕷 🐛🦋 🕷🕷🕷 🐌🐚",
       "🦠🕷🕷🕷 🐞🐜 🦠🦠🦠 🦂🐢 🕷🕷 🐍🐊",
-      "🦠🦠🦠🦠 🐋🐳 🕷🕷🕷🕷 🐬🐟 🦠🕷🦠",
-      "🐠🐡 🕷🕷 🦈🐙 🦠🦠🦠 🐚🐌 🕷🕷🕷",
-      "🐞🐜 🦠🦠🕷 🦋🐛 🕷🕷🕷 🐝🐞 🦠🕷🕷",
-      "🐜🐝 🦠🦠🦠🦠 🦋🐛 🕷🕷 🐔🐧 🦠🕷🦠",
-      "🐦🐤 🦠🦠🕷 🐣🐥 🕷🕷🕷 🦆🦅 🦠🕷🦠",
-      "🦉🦇 🦠🦠🕷 🐺🐗 🕷🕷🕷 🐴🦄 🦠🕷🕷",
-      "🐝🐛 🦠🦠🦠 🐌🐚 🕷🕷🕷 🐞🐜 🦠🕷🕷",
-      "🦂🐢 🕷🕷🕷 🐍🐊 🦠🦠🦠 🐋🐳 🕷🕷🕷",
-      "🐬🐟 🦠🕷🕷 🐠🐡 🕷🕷🕷 🦈🐙 🦠🕷🦠",
-      "🐘🐁 🕷🕷🕷 🐀🐿 🦠🦠🦠 🦔🦇 🕷🕷🕷",
-      "🦡🦨 🦠🕷🕷 🦥🦦 🕷🕷🕷 🦘🦡 🦠🕷🦠",
-      "🦝🦨 🕷🕷🕷 🦫🦦 🦠🦠🦠 🐕‍🦺🐩 🕷🕷🕷",
-      "🐕🐈‍⬛ 🦠🕷🕷 🐈🐓 🕷🕷🕷 🦃🦚 🦠🕷🦠",
     ],
     // make the start content more interesting should be approximately 20 lines:
     allowedKeyCombinations: [["ctrl", "Backspace"], ["ctrl", "ArrowLeft"], ["ctrl", "ArrowRight"]],
+    cursorStartPos: "end",
   }
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     for (const keyCombination of level.allowedKeyCombinations) {
       if(keyCombination.length === 1 && e.key === keyCombination[0]) {
         return;
@@ -58,10 +47,27 @@ export default function Home() {
     e.preventDefault();
   }
 
+  // focus the text area when the level changes
+  useEffect(() => {
+    if(textAreaRef.current) {
+    textAreaRef.current.focus();
+    if(level.cursorStartPos === "end") {
+      textAreaRef.current.selectionStart = textAreaRef.current?.value.length;
+    }
+  }
+  }, [level]);
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-       <textarea cols={level.startContent[0].length} rows={level.startContent.length} defaultValue={level.startContent.join("\n")} onKeyDown={handleKeyDown}></textarea>
+          <h1 className="text-2xl font-bold">{level.title}</h1>
+          <p className="text-sm">{level.description}</p>
+        
+       <textarea ref={textAreaRef} cols={level.startContent[0].length} rows={level.startContent.length} defaultValue={level.startContent.join("\n")} className="rounded-lg resize-none text-black font-extrabold" onKeyDown={handleKeyDown}></textarea>
+        <p className="text-sm">Allowed key combinations: <br/> {level.allowedKeyCombinations.map((keyCombination, index) => (
+          <span key={index} className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">{keyCombination.join(" + ")}</span>
+        ))}</p>
+        <p className="text-sm">Note: The cursor is at the beginning in the {level.cursorStartPos}.</p>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
       TODO: is a footer needed?
