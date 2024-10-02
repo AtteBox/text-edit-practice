@@ -536,8 +536,8 @@ function KeyCombinationTag({ keyCombination }: { keyCombination: string[] }) {
       <span className="text-xs">
         (
         {
-          // @ts-ignore
           keyCombination.reduce(
+            // @ts-ignore
             (acc, curr) => acc[curr],
             keyCombinationExplanation
           )
