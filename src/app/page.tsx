@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, use, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf('MAC')>=0;
@@ -250,7 +250,7 @@ export default function Home() {
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
         {showLevelFinishedAnimation && (<>
           <h1 className="text-2xl font-bold">Level {gameState.currentLevel} finished!</h1>
           <p className="text-sm">{level.postLevelMessage}</p>
@@ -269,18 +269,66 @@ export default function Home() {
             <p className="text-sm">Germs: {gameState.germs}/{totalGerms}</p>
             <p className="text-sm">Animals: {gameState.animals}/{totalAnimals}</p>
           </div>
-       <textarea ref={textAreaRef} cols={level.startContent[0].length} rows={level.startContent.length} defaultValue={level.startContent.join("\n")} className="rounded-lg resize-none text-black font-extrabold" onKeyDown={handleKeyDown}></textarea>
-        <p className="text-sm">Allowed key combinations: <br/> {level.allowedKeyCombinations.map((keyCombination, index) => (
-          <span key={index} className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">{keyCombination.join(" + ")}</span>
-        ))}</p>
+       <textarea ref={textAreaRef} cols={level.startContent[0].length} rows={level.startContent.length} defaultValue={level.startContent.join("\n")} className="p-2 rounded-lg resize-none text-black font-extrabold" onKeyDown={handleKeyDown}></textarea>
+        <span className="text-sm">Allowed key combinations:</span>
+        <div className="flex flex-wrap gap-4">
+        {level.allowedKeyCombinations.map((keyCombination, index) => (
+          <KeyCombinationTag key={keyCombination.join('-')} keyCombination={keyCombination} />
+        ))}
+        </div>
         <p className="text-sm">Note: The cursor is at the beginning in the {level.cursorStartPos}.</p>
         </>
       )}
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-      TODO: is a footer needed?
+      <span className="text-xs">© Atte Virtanen {(new Date()).getFullYear()}</span>
       </footer>
     </div>
   );
+}
 
+function KeyCombinationTag({keyCombination}: {keyCombination: string[]}) {
+  const keyText: Record<string, string> = {
+    "ctrl": "Control",
+    "Backspace": "Backspace",
+    "ArrowLeft": "Left Arrow",
+    "ArrowRight": "Right Arrow",
+    "Delete": "Delete",
+    "option": "Option",
+    "fn": "Fn",
+  }
+  const keyCombinationExplanation: Record<string, string | Record<string, string>> = {
+    "ctrl": {
+      "Backspace": "Remove word to the left",
+      "ArrowLeft": "Move cursor to the left word",
+      "ArrowRight": "Move cursor to the right word",
+      "Delete": "Delete word to the right",
+    },
+    "Backspace": "Delete character to the left",
+    "ArrowLeft": "Move to the character on the left",
+    "ArrowRight": "Move to the character on the right",
+    "Delete": "Delete character to the right",
+    }
+  
+  let actualKeyCombination = keyCombination
+  if(isMac()) {
+    actualKeyCombination = actualKeyCombination.map(key => key === "ctrl" ? "option" : key);
+    actualKeyCombination = actualKeyCombination.flatMap(key => key === "Delete" ? ['fn', 'Backspace'] : key);
+  }
+  return (
+    <div className="inline-block m-2">
+      <span className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">
+      
+    <span className="inline-block p-1 bg-gray-100 rounded-lg text-black m-1">{actualKeyCombination.map(k => keyText[k]).join(" + ")}
+    </span>
+    </span>
+    <br/>
+      <span className="text-xs">(
+        {
+      // @ts-ignore
+      keyCombination.reduce((acc, curr)=> acc[curr], keyCombinationExplanation)
+      }
+      )</span>
+      </div>
+  )
 }
