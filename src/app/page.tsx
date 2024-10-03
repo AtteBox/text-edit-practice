@@ -93,13 +93,30 @@ function calcPoints(gameState: ILevelState, level: ILevel) {
   const content = level.startContent.join("");
   const germRatio = 1 - (gameState.germs ?? 0) / getGermCount(content);
   const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
-  const timeRatio = -Math.max((gameState.elapsedTime / 1000) / level.targetTimeSeconds, 0);
-  console.log('calcPoints', {germRatio, animalRatio, timeRatio, pointCoefficient: level.pointCoefficient});
-  return Math.max(Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient), 0);
+  const timeRatio = -Math.max(
+    gameState.elapsedTime / 1000 / level.targetTimeSeconds,
+    0
+  );
+  console.log("calcPoints", {
+    germRatio,
+    animalRatio,
+    timeRatio,
+    pointCoefficient: level.pointCoefficient,
+  });
+  return Math.max(
+    Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient),
+    0
+  );
 }
 
 function calcTotalPoints(gameState: IGameState, currentLevel: ILevel) {
-  return gameState.previousLevels.reduce((acc, levelState) => acc + calcPoints(levelState, levels[gameState.currentLevel - 2]), 0) + calcPoints(gameState, currentLevel);
+  return (
+    gameState.previousLevels.reduce(
+      (acc, levelState) =>
+        acc + calcPoints(levelState, levels[gameState.currentLevel - 2]),
+      0
+    ) + calcPoints(gameState, currentLevel)
+  );
 }
 
 type ILevel = {
@@ -290,14 +307,21 @@ type IGameState = {
   previousLevels: ILevelState[];
 } & ILevelState;
 
-
 export default function Home() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [gameState, setGameState] = useState<IGameState>({ currentLevel: 1, startTime: 0, elapsedTime: 0, previousLevels: [] });
+  const [gameState, setGameState] = useState<IGameState>({
+    currentLevel: 1,
+    startTime: 0,
+    elapsedTime: 0,
+    previousLevels: [],
+  });
   const level = levels[gameState.currentLevel - 1];
   const totalGerms = getGermCount(level.startContent.join(""));
   const totalAnimals = getAnimalCount(level.startContent.join(""));
-  const [currentKeyCombination, setCurrentKeyCombination] = useState<string[]|null>(null);
+  const [currentKeyCombination, setCurrentKeyCombination] = useState<
+    string[] | null
+  >(null);
+  const [showLevelFinished, setShowLevelFinished] = useState(false);
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     if (!textAreaRef.current) {
@@ -306,7 +330,13 @@ export default function Home() {
     console.log(updateGameState, textAreaRef.current.value);
     const germs = getGermCount(textAreaRef.current.value);
     const animals = getAnimalCount(textAreaRef.current.value);
-    setGameState((state) => ({ ...state, germs, animals, elapsedTime: new Date().getTime() - state.startTime, ...overrides }));
+    setGameState((state) => ({
+      ...state,
+      germs,
+      animals,
+      elapsedTime: new Date().getTime() - state.startTime,
+      ...overrides,
+    }));
   }, []);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -371,29 +401,51 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (gameState.finished) {
+      setTimeout(() => {
+        setShowLevelFinished(true);
+      }, 1000);
+    }
+  }, [gameState.finished]);
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
-        {gameState.finished && (
-          <>
+      <main
+            className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
+        {
+          // grid with two children on top of each other}
+        }
+        {showLevelFinished && (
+          <div
+            className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
+            style={{
+              opacity: gameState.finished ? 1 : 0,
+              transition: "opacity 2s ease",
+            }}
+          >
             <h1 className="text-2xl font-bold">
               Level {gameState.currentLevel} finished!
             </h1>
             <p className="text-sm">{level.postLevelMessage}</p>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 items-end self-stretch">
               <button
                 onClick={() => {
+                  setShowLevelFinished(false);
                   setGameState((state) => ({
                     ...state,
                     finished: false,
                     currentLevel: state.currentLevel + 1,
-                    previousLevels: [...state.previousLevels, {
-                      germs: state.germs,
-                      animals: state.animals,
-                      startTime: state.startTime,
-                      elapsedTime: state.elapsedTime,
-                      finished: true,
-                    }],
+                    previousLevels: [
+                      ...state.previousLevels,
+                      {
+                        germs: state.germs,
+                        animals: state.animals,
+                        startTime: state.startTime,
+                        elapsedTime: state.elapsedTime,
+                        finished: true,
+                      },
+                    ],
                   }));
                 }}
                 className="p-2 bg-blue-500 text-white rounded-lg"
@@ -401,11 +453,22 @@ export default function Home() {
                 Next Level
               </button>
             </div>
-          </>
+          </div>
         )}
-        {!gameState.finished && (
-          <>
-            <h1 className="text-2xl font-bold">{level.title}<span className="text-xs">Total Points: {calcTotalPoints(gameState, level)}</span></h1>
+        {!showLevelFinished && (
+          <div
+            className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
+            style={{
+              opacity: gameState.finished ? 0 : 1,
+              transition: "opacity 1s ease",
+            }}
+          >
+            <h1 className="text-2xl font-bold">
+              {level.title}
+              <span className="text-xs">
+                Total Points: {calcTotalPoints(gameState, level)}
+              </span>
+            </h1>
             <p className="text-sm">{level.description}</p>
             <div className="flex gap-4">
               <p
@@ -432,26 +495,28 @@ export default function Home() {
                 className="text-sm"
                 style={{
                   color: getDangerColor(
-                    (gameState.elapsedTime / 1000) / level.targetTimeSeconds
+                    gameState.elapsedTime / 1000 / level.targetTimeSeconds
                   ),
                 }}
               >
-                Time: {Math.floor(gameState.elapsedTime / 1000)}/{level.targetTimeSeconds}s
+                Time: {Math.floor(gameState.elapsedTime / 1000)}/
+                {level.targetTimeSeconds}s
               </p>
-              <p className="text-sm">*</p> <p
+              <p className="text-sm">*</p>{" "}
+              <p
                 className="text-sm"
                 style={{
                   color: getDangerColor(level.pointCoefficient / 200),
                 }}
               >
                 Difficulty: {level.pointCoefficient}
-                </p>
+              </p>
               <p className="text-sm">=</p>
               <p
                 className="text-sm"
                 style={{
                   color: getDangerColor(
-                    (gameState.elapsedTime / 1000) / level.targetTimeSeconds
+                    gameState.elapsedTime / 1000 / level.targetTimeSeconds
                   ),
                 }}
               >
@@ -483,7 +548,7 @@ export default function Home() {
               Note: The cursor is at the beginning in the {level.cursorStartPos}
               .
             </p>
-          </>
+          </div>
         )}
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
@@ -495,7 +560,13 @@ export default function Home() {
   );
 }
 
-function KeyCombinationTag({ keyCombination, isPressed }: { keyCombination: string[], isPressed: boolean }) {
+function KeyCombinationTag({
+  keyCombination,
+  isPressed,
+}: {
+  keyCombination: string[];
+  isPressed: boolean;
+}) {
   const keyText: Record<string, string> = {
     ctrl: "Control",
     Backspace: "Backspace",
@@ -532,19 +603,23 @@ function KeyCombinationTag({ keyCombination, isPressed }: { keyCombination: stri
   }
   return (
     <div className="inline-block m-2">
-      <span className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1" style={{backgroundColor: isPressed ? 'green': 'white', transition: isPressed ? 'none' : 'background-color 1s ease'}}>
-          {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
+      <span
+        className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1"
+        style={{
+          backgroundColor: isPressed ? "green" : "white",
+          transition: isPressed ? "none" : "background-color 1s ease",
+        }}
+      >
+        {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
       </span>
       <br />
       <span className="text-xs">
         (
-        {
-          keyCombination.reduce(
-            // @ts-ignore
-            (acc, curr) => acc[curr],
-            keyCombinationExplanation
-          )
-        }
+        {keyCombination.reduce(
+          // @ts-ignore
+          (acc, curr) => acc[curr],
+          keyCombinationExplanation
+        )}
         )
       </span>
     </div>
