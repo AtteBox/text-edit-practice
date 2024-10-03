@@ -532,7 +532,7 @@ function KeyCombinationTag({ keyCombination, isPressed }: { keyCombination: stri
   }
   return (
     <div className="inline-block m-2">
-      <span className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1" style={{backgroundColor: isPressed ? 'red': 'white'}}>
+      <span className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1" style={{backgroundColor: isPressed ? 'green': 'white', transition: isPressed ? 'none' : 'background-color 1s ease'}}>
           {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
       </span>
       <br />
