@@ -282,6 +282,7 @@ type ILevelState = {
   animals?: number;
   startTime: number;
   elapsedTime: number;
+  finished?: boolean;
 };
 
 type IGameState = {
@@ -296,8 +297,6 @@ export default function Home() {
   const level = levels[gameState.currentLevel - 1];
   const totalGerms = getGermCount(level.startContent.join(""));
   const totalAnimals = getAnimalCount(level.startContent.join(""));
-  const [showLevelFinishedAnimation, setShowLevelFinishedAnimation] =
-    useState(false);
   const [currentKeyCombination, setCurrentKeyCombination] = useState<string[]|null>(null);
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
@@ -361,7 +360,7 @@ export default function Home() {
   // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
-      setShowLevelFinishedAnimation(true);
+      updateGameState({ finished: true });
     }
   }, [gameState.germs]);
 
@@ -375,7 +374,7 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
-        {showLevelFinishedAnimation && (
+        {gameState.finished && (
           <>
             <h1 className="text-2xl font-bold">
               Level {gameState.currentLevel} finished!
@@ -384,15 +383,16 @@ export default function Home() {
             <div className="flex flex-col gap-4">
               <button
                 onClick={() => {
-                  setShowLevelFinishedAnimation(false);
                   setGameState((state) => ({
                     ...state,
+                    finished: false,
                     currentLevel: state.currentLevel + 1,
                     previousLevels: [...state.previousLevels, {
                       germs: state.germs,
                       animals: state.animals,
                       startTime: state.startTime,
-                      elapsedTime: state.elapsedTime
+                      elapsedTime: state.elapsedTime,
+                      finished: true,
                     }],
                   }));
                 }}
@@ -403,7 +403,7 @@ export default function Home() {
             </div>
           </>
         )}
-        {!showLevelFinishedAnimation && (
+        {!gameState.finished && (
           <>
             <h1 className="text-2xl font-bold">{level.title}<span className="text-xs">Total Points: {calcTotalPoints(gameState, level)}</span></h1>
             <p className="text-sm">{level.description}</p>
