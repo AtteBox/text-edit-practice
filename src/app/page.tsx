@@ -97,12 +97,6 @@ function calcPoints(gameState: ILevelState, level: ILevel) {
     gameState.elapsedTime / 1000 / level.targetTimeSeconds,
     0
   );
-  console.log("calcPoints", {
-    germRatio,
-    animalRatio,
-    timeRatio,
-    pointCoefficient: level.pointCoefficient,
-  });
   return Math.max(
     Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient),
     0
@@ -187,7 +181,7 @@ const levels: ILevel[] = [
     postLevelMessage:
       "Great job! You've learned to use both control and normal keys effectively. In the next level, we will introduce the delete key to help editing from left to right.",
     targetTimeSeconds: 90,
-    pointCoefficient: 100,
+    pointCoefficient: 150,
   },
   {
     title: "Level 3: Control Delete, and Arrow Keys",
@@ -214,8 +208,8 @@ const levels: ILevel[] = [
     cursorStartPos: "start",
     postLevelMessage:
       "Excellent! You've mastered using the delete key together with control for efficient text editing. In the next level, we will introduce the delete key without control to help editing within words also.",
-    targetTimeSeconds: 60,
-    pointCoefficient: 100,
+    targetTimeSeconds: 90,
+    pointCoefficient: 150,
   },
   {
     title:
@@ -245,8 +239,8 @@ const levels: ILevel[] = [
     cursorStartPos: "start",
     postLevelMessage:
       "Fantastic! You've effectively master the delete key now. Next we will use all the keys you've learned so far.",
-    targetTimeSeconds: 90,
-    pointCoefficient: 100,
+    targetTimeSeconds: 120,
+    pointCoefficient: 150,
   },
   {
     title: "Level 5: Mastering All Editing Techniques",
@@ -289,8 +283,8 @@ const levels: ILevel[] = [
     cursorStartPos: "middle",
     postLevelMessage:
       "Outstanding! You've mastered all the editing techniques. You're now a text editing expert!",
-    targetTimeSeconds: 120,
-    pointCoefficient: 100,
+    targetTimeSeconds: 180,
+    pointCoefficient: 200,
   },
 ];
 
@@ -327,7 +321,6 @@ export default function Home() {
     if (!textAreaRef.current) {
       return;
     }
-    console.log(updateGameState, textAreaRef.current.value);
     const germs = getGermCount(textAreaRef.current.value);
     const animals = getAnimalCount(textAreaRef.current.value);
     setGameState((state) => ({
@@ -341,22 +334,25 @@ export default function Home() {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     console.log(e.key, e.ctrlKey, e.metaKey, e.altKey, e.shiftKey);
+    const pressedModifierCount = [e.ctrlKey, e.metaKey, e.altKey, e.shiftKey].filter(pressed => pressed).length;
     for (const keyCombination of level.allowedKeyCombinations) {
-      if (keyCombination.length === 1 && e.key === keyCombination[0]) {
+      const successfullyHandledKeyCombination = () => {
         setCurrentKeyCombination(keyCombination);
         // propagate the event to the base event handler, and then update the game state
         setTimeout(() => updateGameState(), 0);
+      }
+      if (pressedModifierCount === 0 && keyCombination.length === 1 && e.key === keyCombination[0]) {
+        successfullyHandledKeyCombination();
         return;
       }
-      if (keyCombination.length === 2) {
-        setCurrentKeyCombination(keyCombination);
+      if (pressedModifierCount === 1 && keyCombination.length === 2) {
         const [ctrlKey, keyName] = keyCombination;
         if (
           ctrlKey === "ctrl" &&
           ctrlEquivalentPressed(e) &&
           e.key === keyName
         ) {
-          setTimeout(() => updateGameState(), 0);
+          successfullyHandledKeyCombination();
           return;
         }
       }
