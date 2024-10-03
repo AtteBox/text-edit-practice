@@ -98,7 +98,7 @@ function calcPoints(gameState: ILevelState, level: ILevel) {
     0
   );
   return Math.max(
-    Math.floor((germRatio + animalRatio + timeRatio) * level.pointCoefficient),
+    Math.floor((germRatio + 2 * animalRatio + timeRatio) * level.pointCoefficient),
     0
   );
 }
@@ -208,7 +208,7 @@ const levels: ILevel[] = [
     cursorStartPos: "start",
     postLevelMessage:
       "Excellent! You've mastered using the delete key together with control for efficient text editing. In the next level, we will introduce the delete key without control to help editing within words also.",
-    targetTimeSeconds: 90,
+    targetTimeSeconds: 70,
     pointCoefficient: 150,
   },
   {
@@ -216,18 +216,19 @@ const levels: ILevel[] = [
       "Level 4: Combining Control Delete And Just Delete for Word and Character Editing",
     description:
       "Remove the germs and spiders from the text area using the delete key, solely and together with control, to delete letters and entire germ words.",
-    startContent: [
-      "🐶🦠🐱 🕷🕷🕷🕷 🐭🐹🦠 🦠🦠🕷🐰 🦊🐻🦠",
-      "🕷🐼🐨🦠 🐯🕷🦁🐮 🦠🐷🐽🕷 🐸🦠🐵🕷",
-      "🕷🙈🦠🙉 🐶🐱🦠🐭 🦠🦠🕷🕷 🐹🐰🕷🐰",
-      "🦊🐻🕷🦠 🕷🐼🐨🕷 🐯🕷🦁🐮 🕷🦠🐷🐽",
-      "🦠🐸🕷🐵 🕷🙈🦠🙉 🐶🦠🐱🕷 🐭🕷🐹🦠",
-      "🕷🐰🐰🕷 🐻🦊🕷🕷 🦠🐼🐨🦠 🐯🕷🦁🕷",
-      "🐮🕷🦠🐷 🐽🕷🐸🕷 🐵🕷🙈🦠 🐶🐱🕷🐭",
-      "🦠🕷🕷🐹 🐰🕷🐰🦊 🕷🐻🕷🦠 🕷🐼🕷🐨",
-      "🦠🕷🐯🕷 🦁🕷🐮🦠 🕷🐷🕷🐽 🐸🕷🦠🐵",
-      "🕷🙈🕷🙉 🕷🐶🕷🐱 🦠🐭🕷🐹 🦠🕷🐰🕷",
-    ],
+      startContent: [
+        "🦠🦠🕷🕷 🐶🐱🦠🐭 🦠🦠🦠🕷 🐹🐰🐰",
+        "🕷🕷🕷🕷 🐻🐼🐶 🦠🐨🐯🦠 🦁🐮🐱",
+        "🦠🦠🦠🕷 🐷🐽🐰 🕷🐸🐵🦠 🐶🦠🐱",
+        "🐭🐹🕷🐰 🐰🕷🐶🐱 🕷🦠🕷🕷 🐻🐼🐶",
+        "🦠🦠🦠🦠 🐨🐯🐷 🦠🐮🐽🦠 🐸🐵🐶",
+        "🐶🐱🦠🐭 🦠🕷🐹🐰 🕷🕷🕷🕷 🐻🐼🐶",
+        "🦠🦠🕷🦠 🐨🐯🕷🐷 🕷🕷🐮🐽 🦠🐸🐵",
+        "🐶🦠🐱🐭 🦠🦠🦠🕷 🐹🦠🐰🐰 🕷🕷🕷🕷",
+        "🦠🦠🦠🦠 🐻🐼🐶 🕷🕷🕷🕷 🐨🐯🐷",
+        "🦠🐮🕷🐽 🐸🐵🦠🦠 🐶🐱🕷🐭 🕷🕷🕷🕷",
+        "🐹🐰🦠🐰 🦠🕷🕷🕷 🐻🐼🕷🐶 🦠🦠🦠🦠",
+      ],
     allowedKeyCombinations: [
       ["ctrl", "Delete"],
       ["ctrl", "ArrowLeft"],
@@ -240,32 +241,32 @@ const levels: ILevel[] = [
     postLevelMessage:
       "Fantastic! You've effectively master the delete key now. Next we will use all the keys you've learned so far.",
     targetTimeSeconds: 120,
-    pointCoefficient: 150,
+    pointCoefficient: 200,
   },
   {
     title: "Level 5: Mastering All Editing Techniques",
     description:
       "This is the ultimate test! Remove all the germs and spiders from the text using all the key combinations you've learned so far. Use control key combinations for efficient word navigation and deletion, and use normal keys for precise character editing.",
     startContent: [
-      "🐶🕷🐱🦠🐭 🕷🕷🕷🦠 🐹🕷🐰🦠🐰 🦊🕷🐻🦠🐼",
-      "🕷🐨🕷🐯🦠 🦁🕷🐮🦠🐷 🕷🐽🕷🐸🦠🐵",
-      "🕷🙈🦠🕷🙉 🕷🐶🕷🐱🕷🐭 🦠🐹🕷🐰🕷",
-      "🦊🕷🐻🦠🕷🐼 🕷🐨🕷🐯🕷 🦁🕷🐮🦠",
-      "🕷🐷🕷🐽🦠 🐸🕷🦠🐵🕷 🙈🕷🙉🕷🐶",
-      "🦠🐱🕷🐭🕷 🐹🦠🕷🐰🕷🐰 🕷🦊🕷🐻🕷",
+      "🐶🕷🐱🦠🐭 🕷🕷🕷🦠 🕷🕷🕷🦠🕷 🦊🕷🐻🦠🐼",
+      "🕷🐨🕷🐯🦠 🕷🕷🕷🦠🕷 🕷🐽🕷🐸🦠🕷",
+      "🕷🙈🦠🕷🙉 🕷🕷🕷🕷🕷🐭 🦠🦠🕷🐰🕷",
+      "🦊🕷🐻🦠🕷🐼 🐱🐱 🕷🦠🕷🦠🕷 🦁🕷🐮🦠",
+      "🕷🦠🕷🦠🦠 🐸🕷🦠🐵🕷 🦠🕷🦠🕷🦠",
+      "🦠🐱🕷🐭🕷 🦠🦠🕷🦠🕷🐰 🕷🦠🕷🦠🕷",
       "🦠🐼🕷🐨🕷 🐯🕷🦁🕷🐮 🕷🦠🐷🕷🐽",
-      "🕷🐸🕷🦠🐵🕷 🕷🙈🕷🦠🙉 🕷🐶🕷🐱",
-      "🦠🐭🕷🐹🦠 🕷🐰🕷🐰🕷 🦊🕷🐻🕷🦠",
-      "🕷🐼🕷🐨🕷 🐯🕷🦁🕷🐮 🕷🦠🕷🐷🕷",
-      "🐽🕷🐸🦠🕷🐵 🕷🙈🕷🙉🕷 🐶🦠🕷🐱",
-      "🕷🐭🕷🐹🕷🦠 🕷🐰🕷🐰🕷 🦊🕷🐻🕷",
-      "🦠🕷🐼🕷🐨 🕷🐯🕷🦁🕷 🕷🐮🦠🕷🐷",
-      "🕷🐽🕷🐸🕷🦠 🕷🐵🕷🙈🕷 🕷🐶🕷🐱",
-      "🦠🕷🐭🕷🐹 🕷🦠🐰🕷🐰 🕷🦊🕷🐻🕷",
-      "🦠🕷🐼🕷🐨 🕷🐯🕷🦁🕷 🕷🐮🕷🦠🕷",
-      "🦠🕷🐷🕷🐽 🕷🐸🕷🦠🕷 🕷🐵🕷🙈🕷",
-      "🕷🐶🕷🐱🕷 🦠🐭🕷🐹🕷 🕷🐰🕷🐰🕷",
-      "🕷🦊🕷🐻🕷🦠 🕷🐼🕷🐨🕷 🕷🐯🕷🦁",
+      "🕷🦠🕷🦠🦠🕷 🕷🦠🕷🦠🦠 🕷🦠🕷🦠",
+      "🦠🐭🕷🐹🦠 🕷🦠 🐼🐼🐼 🕷🦠🕷 🦠🕷🐻🕷🦠",
+      "🕷🦠🕷🦠🕷 🦠🕷🦁🕷🦠 🕷🦠🕷🦠🕷",
+      "🦠🕷🦠🦠🕷🦠 🕷🦠🕷🦠🕷 🐶🦠🕷🐱",
+      "🕷🐭🕷 🐹🐹 🕷🦠 🕷🦠🕷🦠🕷 🦊🕷🐻🕷",
+      "🦠🕷🦠🕷🦠 🕷🦠🕷🦠🕷 🕷🐮🦠🕷🦠",
+      "🕷🐽🕷🐸🕷🦠 🕷🦠🕷🦠🕷 🕷🐶🕷🐱",
+      "🦠🕷🐭🕷🦠 🕷🦠🦠🕷🦠 🕷🦊🕷🐻🕷",
+      "🦠🕷🐼🕷🦠 🕷🦠🕷🦠🕷 🕷🐮🕷🦠🕷",
+      "🦠🕷🦠🕷🦠 🕷🦠🕷🦠🕷 🕷🦠🕷🦠🕷",
+      "🕷🐶🕷🐱🕷 🦠🦠🕷🦠🕷 🕷🦠🕷🦠🕷",
+      "🕷🦊🕷🐻🕷🦠 🕷🐼🕷🦠🕷 🕷🐯🕷🦁",
       "🕷🦠🕷🐮🕷 🕷🐷🕷🐽🕷 🕷🐸🕷🦠🕷",
     ],
     allowedKeyCombinations: [
@@ -284,7 +285,7 @@ const levels: ILevel[] = [
     postLevelMessage:
       "Outstanding! You've mastered all the editing techniques. You're now a text editing expert!",
     targetTimeSeconds: 180,
-    pointCoefficient: 200,
+    pointCoefficient: 250,
   },
 ];
 
@@ -310,8 +311,6 @@ export default function Home() {
     previousLevels: [],
   });
   const level = levels[gameState.currentLevel - 1];
-  const totalGerms = getGermCount(level.startContent.join(""));
-  const totalAnimals = getAnimalCount(level.startContent.join(""));
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
     string[] | null
   >(null);
@@ -334,14 +333,23 @@ export default function Home() {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     console.log(e.key, e.ctrlKey, e.metaKey, e.altKey, e.shiftKey);
-    const pressedModifierCount = [e.ctrlKey, e.metaKey, e.altKey, e.shiftKey].filter(pressed => pressed).length;
+    const pressedModifierCount = [
+      e.ctrlKey,
+      e.metaKey,
+      e.altKey,
+      e.shiftKey,
+    ].filter((pressed) => pressed).length;
     for (const keyCombination of level.allowedKeyCombinations) {
       const successfullyHandledKeyCombination = () => {
         setCurrentKeyCombination(keyCombination);
         // propagate the event to the base event handler, and then update the game state
         setTimeout(() => updateGameState(), 0);
-      }
-      if (pressedModifierCount === 0 && keyCombination.length === 1 && e.key === keyCombination[0]) {
+      };
+      if (
+        pressedModifierCount === 0 &&
+        keyCombination.length === 1 &&
+        e.key === keyCombination[0]
+      ) {
         successfullyHandledKeyCombination();
         return;
       }
@@ -407,8 +415,7 @@ export default function Home() {
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main
-            className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
         {
           // grid with two children on top of each other}
         }
@@ -423,6 +430,8 @@ export default function Home() {
             <h1 className="text-2xl font-bold">
               Level {gameState.currentLevel} finished!
             </h1>
+            <GameResultsBar gameState={gameState} level={level} />
+            <LevelResultsBar gameState={gameState} level={level} />
             <p className="text-sm">{level.postLevelMessage}</p>
             <div className="flex flex-col gap-4 items-end self-stretch">
               <button
@@ -459,66 +468,10 @@ export default function Home() {
               transition: "opacity 1s ease",
             }}
           >
-            <h1 className="text-2xl font-bold">
-              {level.title}
-              <span className="text-xs">
-                Total Points: {calcTotalPoints(gameState, level)}
-              </span>
-            </h1>
+            <h1 className="text-2xl font-bold">{level.title}</h1>
             <p className="text-sm">{level.description}</p>
-            <div className="flex gap-4">
-              <p
-                className="text-sm"
-                style={{
-                  color: getDangerColor((gameState.germs ?? 0) / totalGerms),
-                }}
-              >
-                Germs: {gameState.germs}/{totalGerms}
-              </p>
-              <p className="text-sm">+</p>
-              <p
-                className="text-sm"
-                style={{
-                  color: getDangerColor(
-                    1 - (gameState.animals ?? 0) / totalAnimals
-                  ),
-                }}
-              >
-                Animals: {gameState.animals}/{totalAnimals}
-              </p>
-              <p className="text-sm">+</p>
-              <p
-                className="text-sm"
-                style={{
-                  color: getDangerColor(
-                    gameState.elapsedTime / 1000 / level.targetTimeSeconds
-                  ),
-                }}
-              >
-                Time: {Math.floor(gameState.elapsedTime / 1000)}/
-                {level.targetTimeSeconds}s
-              </p>
-              <p className="text-sm">*</p>{" "}
-              <p
-                className="text-sm"
-                style={{
-                  color: getDangerColor(level.pointCoefficient / 200),
-                }}
-              >
-                Difficulty: {level.pointCoefficient}
-              </p>
-              <p className="text-sm">=</p>
-              <p
-                className="text-sm"
-                style={{
-                  color: getDangerColor(
-                    gameState.elapsedTime / 1000 / level.targetTimeSeconds
-                  ),
-                }}
-              >
-                Points: {calcPoints(gameState, level)}
-              </p>
-            </div>
+            <GameResultsBar gameState={gameState} level={level} />
+            <LevelResultsBar gameState={gameState} level={level} />
             <textarea
               ref={textAreaRef}
               cols={level.startContent[0].length}
@@ -554,6 +507,83 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+function GameResultsBar({
+  gameState,
+  level,
+}: {
+  gameState: IGameState;
+  level: ILevel;
+}) {
+  return <span className="text-xs">
+    Total Points: {calcTotalPoints(gameState, level)}
+  </span>
+}
+
+function LevelResultsBar({
+  gameState,
+  level
+}: {
+  gameState: ILevelState;
+  level: ILevel;
+}) {
+
+  const totalGerms = getGermCount(level.startContent.join(""));
+  const totalAnimals = getAnimalCount(level.startContent.join(""));
+  return <div className="flex gap-4">
+  <p
+    className="text-sm"
+    style={{
+      color: getDangerColor((gameState.germs ?? 0) / totalGerms),
+    }}
+  >
+    Germs: {gameState.germs}/{totalGerms}
+  </p>
+  <p className="text-sm">+</p>
+  <p
+    className="text-sm"
+    style={{
+      color: getDangerColor(
+        1 - (gameState.animals ?? 0) / totalAnimals
+      ),
+    }}
+  >
+    Animals: {gameState.animals}/{totalAnimals}
+  </p>
+  <p className="text-sm">+</p>
+  <p
+    className="text-sm"
+    style={{
+      color: getDangerColor(
+        gameState.elapsedTime / 1000 / level.targetTimeSeconds
+      ),
+    }}
+  >
+    Time: {Math.floor(gameState.elapsedTime / 1000)}/
+    {level.targetTimeSeconds}s
+  </p>
+  <p className="text-sm">*</p>{" "}
+  <p
+    className="text-sm"
+    style={{
+      color: getDangerColor(level.pointCoefficient / 200),
+    }}
+  >
+    Difficulty: {level.pointCoefficient}
+  </p>
+  <p className="text-sm">=</p>
+  <p
+    className="text-sm"
+    style={{
+      color: getDangerColor(
+        gameState.elapsedTime / 1000 / level.targetTimeSeconds
+      ),
+    }}
+  >
+    Points: {calcPoints(gameState, level)}
+  </p>
+</div>
 }
 
 function KeyCombinationTag({
