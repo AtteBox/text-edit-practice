@@ -1,6 +1,8 @@
 "use client";
 
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import Image from 'next/image'
+import startBanner from '../start-banner.png'
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -299,7 +301,8 @@ type ILevelState = {
 
 type IGameState = {
   currentLevel: number;
-  previousLevels: ILevelState[];
+  previousLevels: (ILevelState & {level: number})[];
+  hasStarted: boolean;
 } & ILevelState;
 
 export default function Home() {
@@ -309,6 +312,7 @@ export default function Home() {
     startTime: 0,
     elapsedTime: 0,
     previousLevels: [],
+    hasStarted: false,
   });
   const level = levels[gameState.currentLevel - 1];
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
@@ -371,7 +375,7 @@ export default function Home() {
 
   // focus the text area when the level changes
   useEffect(() => {
-    if (!textAreaRef.current) {
+    if (!textAreaRef.current || !gameState.hasStarted) {
       return;
     }
     textAreaRef.current.focus();
@@ -389,7 +393,7 @@ export default function Home() {
         break;
     }
     updateGameState({ startTime: Date.now(), elapsedTime: 0 });
-  }, [level]);
+  }, [level, gameState.hasStarted]);
 
   // when there are no germs left, show the level finished animation
   useEffect(() => {
@@ -419,6 +423,7 @@ export default function Home() {
         {
           // grid with two children on top of each other}
         }
+        {!gameState.hasStarted && <StartScreen startGame={() => setGameState((state) => ({...state, hasStarted: true}))} />}
         {showLevelFinished && (
           <div
             className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
@@ -444,6 +449,7 @@ export default function Home() {
                     previousLevels: [
                       ...state.previousLevels,
                       {
+                        level: state.currentLevel,
                         germs: state.germs,
                         animals: state.animals,
                         startTime: state.startTime,
@@ -460,7 +466,7 @@ export default function Home() {
             </div>
           </div>
         )}
-        {!showLevelFinished && (
+        {gameState.hasStarted && !showLevelFinished && (
           <div
             className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
             style={{
@@ -507,6 +513,26 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+function StartScreen({startGame}: {startGame: () => void}) {
+  return <div
+  className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
+>
+  <h1 className="text-2xl font-bold">
+    Welcome to Typo Terminator!
+  </h1>
+  <p className="text-sm">A game where you eliminate unwanted characters swiftly!</p>
+  <Image src={startBanner} alt="Typo Terminator Banner" />
+  <div className="flex flex-col gap-4 items-end self-stretch">
+    <button
+      onClick={startGame}
+      className="p-2 bg-blue-500 text-white rounded-lg"
+    >
+      Start Game
+    </button>
+  </div>
+</div>
 }
 
 function GameResultsBar({
