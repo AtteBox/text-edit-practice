@@ -1,3 +1,11 @@
+# About
+
+"Typo Terminator" is a game for practicing basic text editing using the keyboard.
+
+The main-branch is being automatically deployed here: https://main.d2rz08zw1ht14m.amplifyapp.com/
+
+# NextJS
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
