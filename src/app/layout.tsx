@@ -1,10 +1,28 @@
 import type { Metadata } from "next";
-import { Roboto_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Roboto_Mono } from 'next/font/google'
+
+import "./globals.css";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
 
 const roboto_mono = Roboto_Mono({
-  subsets: ["latin"],
-  display: "swap",
-});
+  subsets: ['latin'],
+  display: 'swap',
+})
+ 
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +36,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={roboto_mono.className}>{children}</body>
+      <body
+        className={roboto_mono.className}
+      >
+        {children}
+      </body>
     </html>
   );
 }
