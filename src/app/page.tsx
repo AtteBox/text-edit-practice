@@ -111,7 +111,7 @@ function calcTotalPoints(gameState: IGameState, currentLevel: ILevel) {
   return (
     gameState.previousLevels.reduce(
       (acc, levelState) =>
-        acc + calcPoints(levelState, levels[gameState.currentLevel - 2]),
+        acc + calcPoints(levelState, levels[levelState.level - 1]),
       0
     ) + calcPoints(gameState, currentLevel)
   );
@@ -310,7 +310,6 @@ type IGameState = {
 } & ILevelState;
 
 export default function Home() {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [gameState, setGameState] = useState<IGameState>({
     currentLevel: 1,
     startTime: 0,
@@ -319,72 +318,23 @@ export default function Home() {
     hasStarted: false,
   });
   const level = levels[gameState.currentLevel - 1];
-  const [currentKeyCombination, setCurrentKeyCombination] = useState<
-    string[] | null
-  >(null);
+
   const [showLevelFinished, setShowLevelFinished] = useState(false);
   const isLastLevel = gameState.currentLevel === levels.length;
-  const keysByLevel = useRef<Record<string, string[]>>({});
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
-    if (!textAreaRef.current) {
-      console.warn("Cannot update Game State: No text area ref.");
-      return;
-    }
-    const germs = getGermCount(textAreaRef.current.value);
-    const animals = getAnimalCount(textAreaRef.current.value);
     setGameState((state) => ({
       ...state,
-      germs,
-      animals,
       elapsedTime: new Date().getTime() - state.startTime,
       ...overrides,
     }));
   }, []);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    console.log(e.key, e.ctrlKey, e.metaKey, e.altKey, e.shiftKey);
-    const pressedModifierCount = [
-      e.ctrlKey,
-      e.metaKey,
-      e.altKey,
-      e.shiftKey,
-    ].filter((pressed) => pressed).length;
-    for (const keyCombination of level.allowedKeyCombinations) {
-      const successfullyHandledKeyCombination = () => {
-        keysByLevel.current[gameState.currentLevel] = [
-          ...(keysByLevel.current[gameState.currentLevel] ?? []),
-          keyCombination.reduce((acc, key) => acc + "+" + key),
-        ];
-        setCurrentKeyCombination(keyCombination);
-        // propagate the event to the base event handler, and then update the game state
-        setTimeout(() => updateGameState(), 0);
-      };
-      if (
-        pressedModifierCount === 0 &&
-        keyCombination.length === 1 &&
-        e.key === keyCombination[0]
-      ) {
-        successfullyHandledKeyCombination();
-        return;
-      }
-      if (pressedModifierCount === 1 && keyCombination.length === 2) {
-        const [ctrlKey, keyName] = keyCombination;
-        if (
-          ctrlKey === "ctrl" &&
-          ctrlEquivalentPressed(e) &&
-          e.key === keyName
-        ) {
-          successfullyHandledKeyCombination();
-          return;
-        }
-      }
-    }
-    // prevent disallowed key combinations
-    e.preventDefault();
-  };
+  const clearLevelTimer = useCallback(() => {
+    updateGameState({ startTime: Date.now(), elapsedTime: 0 });
+  }, [updateGameState]);
 
-  const startNextLevel = () => {
+  const startNextLevel = useCallback(() => {
     setShowLevelFinished(false);
     setGameState((state) => ({
       ...state,
@@ -402,36 +352,16 @@ export default function Home() {
         },
       ],
     }));
-  };
+  }, []);
 
-  // focus the text area when the level changes
-  useEffect(() => {
-    if (!textAreaRef.current || !gameState.hasStarted) {
-      return;
-    }
-    textAreaRef.current.focus();
-    switch (level.cursorStartPos) {
-      case "start":
-        textAreaRef.current.selectionStart = 0;
-        break;
-      case "middle":
-        textAreaRef.current.selectionStart = Math.floor(
-          textAreaRef.current.value.length / 2
-        );
-        break;
-      case "end":
-        textAreaRef.current.selectionStart = textAreaRef.current.value.length;
-        break;
-      default:
-        assertNever(level.cursorStartPos);
-    }
-    updateGameState({ startTime: Date.now(), elapsedTime: 0 });
-  }, [level, gameState.hasStarted, updateGameState]);
+  const startGame = useCallback(
+    () => setGameState((state) => ({ ...state, hasStarted: true })),
+    []
+  );
 
   // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
-      console.log("finished", { keysByLevel: keysByLevel.current });
       updateGameState({ finished: true });
     }
   }, [gameState.germs, updateGameState]);
@@ -454,17 +384,15 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
-        {
-          // grid with two children on top of each other}
-        }
-        {!gameState.hasStarted && (
-          <StartScreen
-            startGame={() =>
-              setGameState((state) => ({ ...state, hasStarted: true }))
-            }
+        {!gameState.hasStarted && <StartScreen startGame={startGame} />}
+        {gameState.hasStarted && !showLevelFinished && (
+          <LevelScreen
+            level={level}
+            gameState={gameState}
+            updateLevelStats={updateGameState}
+            clearLevelTimer={clearLevelTimer}
           />
         )}
-        {isLastLevel && gameState.finished && <EndScreen />}
         {showLevelFinished && !isLastLevel && (
           <FinishedLevelScreen
             gameState={gameState}
@@ -472,44 +400,8 @@ export default function Home() {
             startNextLevel={startNextLevel}
           />
         )}
-        {gameState.hasStarted && !showLevelFinished && (
-          <div
-            className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
-            style={{
-              opacity: gameState.finished ? 0 : 1,
-              transition: "opacity 1s ease",
-            }}
-          >
-            <h1 className="text-2xl font-bold">{level.title}</h1>
-            <p className="text-sm">{level.description}</p>
-            <GameResultsBar gameState={gameState} level={level} />
-            <LevelResultsBar gameState={gameState} level={level} />
-            <textarea
-              ref={textAreaRef}
-              cols={level.startContent[0].length}
-              rows={level.startContent.length}
-              defaultValue={level.startContent.join("\n")}
-              className="p-2 rounded-lg resize-none text-black font-extrabold"
-              onKeyDown={handleKeyDown}
-              onKeyUp={() => setCurrentKeyCombination(null)}
-            ></textarea>
-            <div>
-              <span className="text-sm">Allowed key combinations:</span>
-              <div className="flex flex-wrap gap-2">
-                {level.allowedKeyCombinations.map((keyCombination) => (
-                  <KeyCombinationTag
-                    key={keyCombination.join("-")}
-                    keyCombination={keyCombination}
-                    isPressed={currentKeyCombination === keyCombination}
-                  />
-                ))}
-              </div>
-            </div>
-            <p className="text-sm">
-              Note: The cursor is {getCursorText(level.cursorStartPos)}
-              .
-            </p>
-          </div>
+        {showLevelFinished && isLastLevel && (
+          <EndScreen gameState={gameState} levels={levels} />
         )}
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
@@ -538,7 +430,6 @@ function assertNever(cursorStartPos: never): never {
   throw new Error(`Unexpected cursor position: ${cursorStartPos}`);
 }
 
-
 function FinishedLevelScreen({
   gameState,
   level,
@@ -559,8 +450,8 @@ function FinishedLevelScreen({
       <h1 className="text-2xl font-bold">
         Level {gameState.currentLevel} Completed!
       </h1>
-      <GameResultsBar gameState={gameState} level={level} />
       <LevelResultsBar gameState={gameState} level={level} />
+      <GameResultsBar gameState={gameState} level={level} alignRight={false} />
       <p className="text-sm">{level.postLevelMessage}</p>
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
@@ -570,6 +461,146 @@ function FinishedLevelScreen({
           Next Level
         </button>
       </div>
+    </div>
+  );
+}
+
+function LevelScreen({
+  level,
+  gameState,
+  updateLevelStats,
+  clearLevelTimer,
+}: {
+  level: ILevel;
+  gameState: IGameState;
+  updateLevelStats: ({
+    germs,
+    animals,
+  }: {
+    germs: number;
+    animals: number;
+  }) => void;
+  clearLevelTimer: () => void;
+}) {
+  const [currentKeyCombination, setCurrentKeyCombination] = useState<
+    string[] | null
+  >(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const keysByLevel = useRef<Record<string, string[]>>({});
+
+  // focus the text area when the level changes
+  useEffect(() => {
+    if (!textAreaRef.current || !gameState.hasStarted) {
+      return;
+    }
+    textAreaRef.current.focus();
+    switch (level.cursorStartPos) {
+      case "start":
+        textAreaRef.current.selectionStart = 0;
+        break;
+      case "middle":
+        textAreaRef.current.selectionStart = Math.floor(
+          textAreaRef.current.value.length / 2
+        );
+        break;
+      case "end":
+        textAreaRef.current.selectionStart = textAreaRef.current.value.length;
+        break;
+      default:
+        assertNever(level.cursorStartPos);
+    }
+    clearLevelTimer();
+  }, [gameState.hasStarted, level.cursorStartPos, clearLevelTimer]);
+
+  const handleKeyCombinationChange = (keyCombination: string[]) => {
+    setCurrentKeyCombination(keyCombination);
+
+    keysByLevel.current[gameState.currentLevel] = [
+      ...(keysByLevel.current[gameState.currentLevel] ?? []),
+      keyCombination.reduce((acc, key) => acc + "+" + key),
+    ];
+
+    // propagate the event to the base event handler, and then update the game state
+    setTimeout(() => {
+      if (!textAreaRef.current) {
+        console.warn("Cannot updateLevelStats: Text area not found");
+        return;
+      }
+      const germs = getGermCount(textAreaRef.current.value);
+      const animals = getAnimalCount(textAreaRef.current.value);
+      updateLevelStats({ germs, animals });
+    }, 0);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    console.log(e.key, e.ctrlKey, e.metaKey, e.altKey, e.shiftKey);
+    const pressedModifierCount = [
+      e.ctrlKey,
+      e.metaKey,
+      e.altKey,
+      e.shiftKey,
+    ].filter((pressed) => pressed).length;
+    for (const keyCombination of level.allowedKeyCombinations) {
+      if (
+        pressedModifierCount === 0 &&
+        keyCombination.length === 1 &&
+        e.key === keyCombination[0]
+      ) {
+        handleKeyCombinationChange(keyCombination);
+        return;
+      }
+      if (pressedModifierCount === 1 && keyCombination.length === 2) {
+        const [ctrlKey, keyName] = keyCombination;
+        if (
+          ctrlKey === "ctrl" &&
+          ctrlEquivalentPressed(e) &&
+          e.key === keyName
+        ) {
+          handleKeyCombinationChange(keyCombination);
+          return;
+        }
+      }
+    }
+    // prevent disallowed key combinations
+    e.preventDefault();
+  };
+
+  return (
+    <div
+      className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
+      style={{
+        opacity: gameState.finished ? 0 : 1,
+        transition: "opacity 1s ease",
+      }}
+    >
+      <h1 className="text-2xl font-bold">{level.title}</h1>
+      <p className="text-sm">{level.description}</p>
+      <GameResultsBar gameState={gameState} level={level} alignRight={false} />
+      <LevelResultsBar gameState={gameState} level={level} />
+      <textarea
+        ref={textAreaRef}
+        cols={level.startContent[0].length}
+        rows={level.startContent.length}
+        defaultValue={level.startContent.join("\n")}
+        className="p-2 rounded-lg resize-none text-black font-extrabold"
+        onKeyDown={handleKeyDown}
+        onKeyUp={() => setCurrentKeyCombination(null)}
+      ></textarea>
+      <div>
+        <span className="text-sm">Allowed key combinations:</span>
+        <div className="flex flex-wrap gap-2">
+          {level.allowedKeyCombinations.map((keyCombination) => (
+            <KeyCombinationTag
+              key={keyCombination.join("-")}
+              keyCombination={keyCombination}
+              isPressed={currentKeyCombination === keyCombination}
+            />
+          ))}
+        </div>
+      </div>
+      <p className="text-sm">
+        Note: The cursor is {getCursorText(level.cursorStartPos)}.
+      </p>
     </div>
   );
 }
@@ -594,11 +625,27 @@ function StartScreen({ startGame }: { startGame: () => void }) {
   );
 }
 
-function EndScreen() {
+function EndScreen({
+  gameState,
+  levels,
+}: {
+  gameState: IGameState;
+  levels: ILevel[];
+}) {
+  const lastLevel = levels[levels.length - 1];
+  const allLevelGameStates = [...gameState.previousLevels, gameState];
   return (
     <div className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md">
       <h1 className="text-2xl font-bold">Congratulations!</h1>
       <p className="text-sm">You&apos;ve completed all the levels!</p>
+      <ol className="list-decimal">
+        {allLevelGameStates.map((gameState, index) => (
+          <li key={index}>
+            <LevelResultsBar gameState={gameState} level={levels[index]} />
+          </li>
+        ))}
+      </ol>
+      <GameResultsBar gameState={gameState} level={lastLevel} alignRight />
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
           onClick={() => {
@@ -616,12 +663,14 @@ function EndScreen() {
 function GameResultsBar({
   gameState,
   level,
+  alignRight,
 }: {
   gameState: IGameState;
   level: ILevel;
+  alignRight?: boolean;
 }) {
   return (
-    <span className="text-xs">
+    <span className={"text-xs" + alignRight ? " self-end" : " self-start"}>
       Total Points: {calcTotalPoints(gameState, level)}
     </span>
   );
@@ -756,4 +805,3 @@ function KeyCombinationTag({
     </div>
   );
 }
-
