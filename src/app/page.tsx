@@ -685,6 +685,7 @@ function LevelResultsBar({
 }) {
   const totalGerms = getGermCount(level.startContent.join(""));
   const totalAnimals = getAnimalCount(level.startContent.join(""));
+  const points = calcPoints(gameState, level);
   return (
     <div className="flex gap-4">
       <p
@@ -720,7 +721,7 @@ function LevelResultsBar({
       <p
         className="text-sm"
         style={{
-          color: getDangerColor(level.pointCoefficient / 200),
+          color: getDangerColor((level.pointCoefficient - 100) / 150),
         }}
       >
         Difficulty: {level.pointCoefficient}
@@ -729,12 +730,10 @@ function LevelResultsBar({
       <p
         className="text-sm"
         style={{
-          color: getDangerColor(
-            gameState.elapsedTime / 1000 / level.targetTimeSeconds
-          ),
+          color: getDangerColor(Math.max(200 - points, 0) / 200),
         }}
       >
-        Points: {calcPoints(gameState, level)}
+        Points: {points}
       </p>
     </div>
   );
