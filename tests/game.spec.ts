@@ -1,31 +1,76 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 const isMac = process.platform === "darwin";
 
 test("when page is loaded, initially show start view", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
-  await expect(page.getByText("Start Game")).toBeVisible();
+  await expect(page.getByRole('button', {name: "Start Game"})).toBeVisible();
 });
 
-test("when played through first level, show results", async ({ page }) => {
+test("when played through first level, show level results", async ({
+  page,
+}) => {
   await page.goto("/");
-  await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
-  await page.click("text=Start Game");
+  await page.getByRole('button', {name: "Start Game"}).click();
   await expect(page.getByText("Level 1")).toBeVisible();
   const textarea = await page.$("textarea");
-  for (const key of keysByLevel["1"]) {
+  for (const key of keysByLevel[0]) {
     page.waitForTimeout(10);
-    await textarea!.press(isMac ? key.replace("Control", "Alt"): key);
+    await textarea!.press(isMac ? key.replace("Control", "Alt") : key);
   }
   await expect(page.getByText("Level 1 Completed")).toBeVisible();
-  for(const text of ["Germs: 0/69", "Animals: 44/44", "Difficulty: 100"]) {
-    await expect(page.getByText(text, {exact: true})).toBeVisible();
+  for (const text of ["Germs: 0/69", "Animals: 44/44", "Difficulty: 100"]) {
+    await expect(page.getByText(text, { exact: true })).toBeVisible();
+  }
+  await expect(page.getByRole('button', {name: "Next Level"})).toBeVisible();
+});
+
+test("when played through the game, show finished game view and calculate total points correctly", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole('button', {name: "Start Game"}).click();
+  let totalPoints = 0;
+  for (let i = 0; i < keysByLevel.length; i++) {
+    const isLastLevel = i === keysByLevel.length - 1;
+    await expect(page.getByText(`Level ${i + 1}`)).toBeVisible();
+    const textarea = await page.$("textarea");
+    for (const key of keysByLevel[i]) {
+      page.waitForTimeout(10);
+      await textarea!.press(isMac ? key.replace("Control", "Alt") : key);
+    }
+    if (isLastLevel) {
+      await expect(page.getByText(`Congratulations!`)).toBeVisible();
+    } else {
+      await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
+    }
+    totalPoints += await extractPoints(page);
+    await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
+    if (!isLastLevel) {
+      await page.getByRole('button', {name: "Next Level"}).click();
+    }
   }
 });
 
-const keysByLevel = {
-  "1": [
+/**
+ * Extracts points from the last "Points: " text on the page
+ * @param page 
+ * @returns points as integer
+ */
+async function extractPoints(page: Page) {
+  const pointsRegex = /^Points: ([0-9]+)/;
+  const points = await page.getByText(pointsRegex, { exact: true }).all();
+  if (points.length === 0) {
+    throw new Error("Points not found on page");
+  }
+  const pointsText = await points[points.length - 1].textContent();
+  const match = pointsText!.match(pointsRegex);
+  return Number(match![1]);
+}
+
+const keysByLevel = [
+  [
     "Control+ArrowLeft",
     "Control+Backspace",
     "Control+ArrowLeft",
@@ -78,7 +123,7 @@ const keysByLevel = {
     "Control+ArrowLeft",
     "Control+Backspace",
   ],
-  "2": [
+  [
     "Control+Backspace",
     "ArrowLeft",
     "ArrowLeft",
@@ -207,7 +252,7 @@ const keysByLevel = {
     "Control+ArrowLeft",
     "Control+Backspace",
   ],
-  "3": [
+  [
     "Control+ArrowRight",
     "Control+Delete",
     "Control+ArrowRight",
@@ -297,7 +342,7 @@ const keysByLevel = {
     "Control+ArrowRight",
     "Control+Delete",
   ],
-  "4": [
+  [
     "Control+Delete",
     "Control+ArrowRight",
     "ArrowLeft",
@@ -432,7 +477,7 @@ const keysByLevel = {
     "ArrowRight",
     "Control+Delete",
   ],
-  "5": [
+  [
     "Delete",
     "Delete",
     "Control+Backspace",
@@ -746,4 +791,4 @@ const keysByLevel = {
     "Delete",
     "Delete",
   ],
-};
+];
