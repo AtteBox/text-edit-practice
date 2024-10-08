@@ -3,6 +3,7 @@
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import startBanner from "../start-banner.png";
+import { start } from "repl";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -321,6 +322,7 @@ export default function Home() {
     string[] | null
   >(null);
   const [showLevelFinished, setShowLevelFinished] = useState(false);
+  const isLastLevel = gameState.currentLevel === levels.length;
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     if (!textAreaRef.current) {
@@ -373,6 +375,26 @@ export default function Home() {
     }
     // prevent disallowed key combinations
     e.preventDefault();
+  };
+
+  const startNextLevel = () => {
+    setShowLevelFinished(false);
+    setGameState((state) => ({
+      ...state,
+      finished: false,
+      currentLevel: state.currentLevel + 1,
+      previousLevels: [
+        ...state.previousLevels,
+        {
+          level: state.currentLevel,
+          germs: state.germs,
+          animals: state.animals,
+          startTime: state.startTime,
+          elapsedTime: state.elapsedTime,
+          finished: true,
+        },
+      ],
+    }));
   };
 
   // focus the text area when the level changes
@@ -432,47 +454,13 @@ export default function Home() {
             }
           />
         )}
-        {showLevelFinished && (
-          <div
-            className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
-            style={{
-              opacity: gameState.finished ? 1 : 0,
-              transition: "opacity 2s ease",
-            }}
-          >
-            <h1 className="text-2xl font-bold">
-              Level {gameState.currentLevel} finished!
-            </h1>
-            <GameResultsBar gameState={gameState} level={level} />
-            <LevelResultsBar gameState={gameState} level={level} />
-            <p className="text-sm">{level.postLevelMessage}</p>
-            <div className="flex flex-col gap-4 items-end self-stretch">
-              <button
-                onClick={() => {
-                  setShowLevelFinished(false);
-                  setGameState((state) => ({
-                    ...state,
-                    finished: false,
-                    currentLevel: state.currentLevel + 1,
-                    previousLevels: [
-                      ...state.previousLevels,
-                      {
-                        level: state.currentLevel,
-                        germs: state.germs,
-                        animals: state.animals,
-                        startTime: state.startTime,
-                        elapsedTime: state.elapsedTime,
-                        finished: true,
-                      },
-                    ],
-                  }));
-                }}
-                className="p-2 bg-blue-500 text-white rounded-lg"
-              >
-                Next Level
-              </button>
-            </div>
-          </div>
+        {isLastLevel && gameState.finished && <EndScreen />}
+        {showLevelFinished && !isLastLevel && (
+          <FinishedLevelScreen
+            gameState={gameState}
+            level={level}
+            startNextLevel={startNextLevel}
+          />
         )}
         {gameState.hasStarted && !showLevelFinished && (
           <div
@@ -523,6 +511,41 @@ export default function Home() {
   );
 }
 
+function FinishedLevelScreen({
+  gameState,
+  level,
+  startNextLevel,
+}: {
+  gameState: IGameState;
+  level: ILevel;
+  startNextLevel: () => void;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
+      style={{
+        opacity: gameState.finished ? 1 : 0,
+        transition: "opacity 2s ease",
+      }}
+    >
+      <h1 className="text-2xl font-bold">
+        Level {gameState.currentLevel} finished!
+      </h1>
+      <GameResultsBar gameState={gameState} level={level} />
+      <LevelResultsBar gameState={gameState} level={level} />
+      <p className="text-sm">{level.postLevelMessage}</p>
+      <div className="flex flex-col gap-4 items-end self-stretch">
+        <button
+          onClick={startNextLevel}
+          className="p-2 bg-blue-500 text-white rounded-lg"
+        >
+          Next Level
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function StartScreen({ startGame }: { startGame: () => void }) {
   return (
     <div className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md">
@@ -537,6 +560,25 @@ function StartScreen({ startGame }: { startGame: () => void }) {
           className="p-2 bg-blue-500 text-white rounded-lg"
         >
           Start Game
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EndScreen() {
+  return (
+    <div className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md">
+      <h1 className="text-2xl font-bold">Congratulations!</h1>
+      <p className="text-sm">You&apos;ve completed all the levels!</p>
+      <div className="flex flex-col gap-4 items-end self-stretch">
+        <button
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="p-2 bg-blue-500 text-white rounded-lg"
+        >
+          Restart Game
         </button>
       </div>
     </div>
