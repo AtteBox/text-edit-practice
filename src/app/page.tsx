@@ -3,7 +3,6 @@
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import startBanner from "../start-banner.png";
-import { start } from "repl";
 
 function isMac() {
   return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -118,12 +117,14 @@ function calcTotalPoints(gameState: IGameState, currentLevel: ILevel) {
   );
 }
 
+type ICursorStartPos = "start" | "middle" | "end";
+
 type ILevel = {
   title: string;
   description: string;
   startContent: string[];
   allowedKeyCombinations: string[][];
-  cursorStartPos: "start" | "middle" | "end";
+  cursorStartPos: ICursorStartPos;
   postLevelMessage: string;
   targetTimeSeconds: number;
   pointCoefficient: number;
@@ -323,9 +324,11 @@ export default function Home() {
   >(null);
   const [showLevelFinished, setShowLevelFinished] = useState(false);
   const isLastLevel = gameState.currentLevel === levels.length;
+  const keysByLevel = useRef<Record<string, string[]>>({});
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     if (!textAreaRef.current) {
+      console.warn("Cannot update Game State: No text area ref.");
       return;
     }
     const germs = getGermCount(textAreaRef.current.value);
@@ -349,6 +352,10 @@ export default function Home() {
     ].filter((pressed) => pressed).length;
     for (const keyCombination of level.allowedKeyCombinations) {
       const successfullyHandledKeyCombination = () => {
+        keysByLevel.current[gameState.currentLevel] = [
+          ...(keysByLevel.current[gameState.currentLevel] ?? []),
+          keyCombination.reduce((acc, key) => acc + "+" + key),
+        ];
         setCurrentKeyCombination(keyCombination);
         // propagate the event to the base event handler, and then update the game state
         setTimeout(() => updateGameState(), 0);
@@ -415,6 +422,8 @@ export default function Home() {
       case "end":
         textAreaRef.current.selectionStart = textAreaRef.current.value.length;
         break;
+      default:
+        assertNever(level.cursorStartPos);
     }
     updateGameState({ startTime: Date.now(), elapsedTime: 0 });
   }, [level, gameState.hasStarted, updateGameState]);
@@ -422,6 +431,7 @@ export default function Home() {
   // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
+      console.log("finished", { keysByLevel: keysByLevel.current });
       updateGameState({ finished: true });
     }
   }, [gameState.germs, updateGameState]);
@@ -496,7 +506,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-sm">
-              Note: The cursor is at the beginning in the {level.cursorStartPos}
+              Note: The cursor is {getCursorText(level.cursorStartPos)}
               .
             </p>
           </div>
@@ -510,6 +520,24 @@ export default function Home() {
     </div>
   );
 }
+
+function getCursorText(cursorStartPos: ICursorStartPos): string {
+  switch (cursorStartPos) {
+    case "start":
+      return "at the beginning";
+    case "middle":
+      return "in the middle";
+    case "end":
+      return "at the end";
+    default:
+      assertNever(cursorStartPos);
+  }
+}
+
+function assertNever(cursorStartPos: never): never {
+  throw new Error(`Unexpected cursor position: ${cursorStartPos}`);
+}
+
 
 function FinishedLevelScreen({
   gameState,
@@ -529,7 +557,7 @@ function FinishedLevelScreen({
       }}
     >
       <h1 className="text-2xl font-bold">
-        Level {gameState.currentLevel} finished!
+        Level {gameState.currentLevel} Completed!
       </h1>
       <GameResultsBar gameState={gameState} level={level} />
       <LevelResultsBar gameState={gameState} level={level} />
@@ -728,3 +756,4 @@ function KeyCombinationTag({
     </div>
   );
 }
+
