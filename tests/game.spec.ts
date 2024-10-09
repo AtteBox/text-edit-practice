@@ -1,26 +1,25 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect, Page, ElementHandle } from "@playwright/test";
 
 const isMac = process.platform === "darwin";
 
 test("when page is loaded, initially show start view", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
-  await expect(page.getByRole('button', {name: "Start Game"})).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start Game" })).toBeVisible();
 });
 
 test("when played through first level, show level results", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole('button', {name: "Start Game"}).click();
+  await page.getByRole("button", { name: "Start Game" }).click();
   await expect(page.getByText("Level 1")).toBeVisible();
   const textarea = await page.$("textarea");
   for (const key of keysByLevel[0]) {
-    page.waitForTimeout(10);
-    await textarea!.press(isMac ? key.replace("Control", "Alt") : key);
+    await pressGameKey(textarea, key);
   }
   await expect(page.getByText("Level 1 Completed")).toBeVisible();
-  await expect(page.getByRole('button', {name: "Next Level"})).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next Level" })).toBeVisible();
   for (const text of ["Germs: 0/69", "Animals: 44/44", "Difficulty: 100"]) {
     await expect(page.getByText(text, { exact: true })).toBeVisible();
   }
@@ -37,11 +36,33 @@ test("when played through first level, show level results", async ({
   await expect(time).toBeLessThanOrEqual(100);
 });
 
+test("when played through first level with too many mistakes, show level failed message", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start Game" }).click();
+  await expect(page.getByText("Level 1")).toBeVisible();
+  const textarea = await page.$("textarea");
+  for (const key of level1FailKeys) {
+    await pressGameKey(textarea, key);
+  }
+  await expect(page.getByText("Level 1 Failed")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Restart Game" })).toBeVisible();
+  for (const text of ["Germs: 0/69", "Animals: 0/44", "Difficulty: 100"]) {
+    await expect(page.getByText(text, { exact: true })).toBeVisible();
+  }
+  await expect(extractPoints(page)).resolves.toBe(0);
+
+  // when pressing restart game, should go back to start view
+  await page.getByRole("button", { name: "Restart Game" }).click();
+  await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
+});
+
 test("when played through the game, show finished game view and calculate total points correctly", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole('button', {name: "Start Game"}).click();
+  await page.getByRole("button", { name: "Start Game" }).click();
   let totalPoints = 0;
   for (let i = 0; i < keysByLevel.length; i++) {
     const isLastLevel = i === keysByLevel.length - 1;
@@ -50,8 +71,7 @@ test("when played through the game, show finished game view and calculate total 
     await expect(extractPoints(page)).resolves.toBe(0);
     const textarea = await page.$("textarea");
     for (const key of keysByLevel[i]) {
-      page.waitForTimeout(10);
-      await textarea!.press(isMac ? key.replace("Control", "Alt") : key);
+      await pressGameKey(textarea, key);
     }
     if (isLastLevel) {
       await expect(page.getByText(`Congratulations!`)).toBeVisible();
@@ -61,14 +81,26 @@ test("when played through the game, show finished game view and calculate total 
     totalPoints += await extractPoints(page);
     await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
     if (!isLastLevel) {
-      await page.getByRole('button', {name: "Next Level"}).click();
+      await page.getByRole("button", { name: "Next Level" }).click();
     }
   }
 });
 
 /**
+ * Presses a key in the game textarea
+ * @param gameElement
+ * @param key key to press
+ */
+async function pressGameKey(gameElement: ElementHandle | null, key: string) {
+  if (!gameElement) {
+    throw new Error("Game textarea is undefined");
+  }
+  await gameElement.press(isMac ? key.replace("Control", "Alt") : key);
+}
+
+/**
  * Extracts points from the last "Points: " text on the page
- * @param page 
+ * @param page
  * @returns points as integer
  */
 async function extractPoints(page: Page) {
@@ -816,4 +848,58 @@ const keysByLevel = [
     "Delete",
     "Delete",
   ],
+];
+
+const level1FailKeys = [
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+ArrowRight",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
+  "Control+Backspace",
 ];

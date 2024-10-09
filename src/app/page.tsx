@@ -321,6 +321,8 @@ export default function Home() {
 
   const [showLevelFinished, setShowLevelFinished] = useState(false);
   const isLastLevel = gameState.currentLevel === levels.length;
+  const levelFailed =
+    !!gameState.levelFinished && calcPoints(gameState, level) <= 1;
 
   const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
     setGameState((state) => ({
@@ -337,7 +339,7 @@ export default function Home() {
       levelFinished: false,
       germs: undefined,
       animals: undefined,
-      startTime: Date.now(), 
+      startTime: Date.now(),
       elapsedTime: 0,
       currentLevel: state.currentLevel + 1,
       previousLevels: [
@@ -355,9 +357,19 @@ export default function Home() {
   }, []);
 
   const startGame = useCallback(
-    () => setGameState((state) => ({ ...state, gameHasStarted: true, startTime: Date.now(), elapsedTime: 0 })),
+    () =>
+      setGameState((state) => ({
+        ...state,
+        gameHasStarted: true,
+        startTime: Date.now(),
+        elapsedTime: 0,
+      })),
     []
   );
+
+  const restartGame = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   // when there are no germs left, show the level finished animation
   useEffect(() => {
@@ -367,12 +379,12 @@ export default function Home() {
   }, [gameState.germs, updateGameState]);
 
   useEffect(() => {
-    if(gameState.gameHasStarted && !gameState.levelFinished) {
-    const interval = setInterval(() => {
-      updateGameState();
-    }, 1000);
-    return () => clearInterval(interval);
-  }
+    if (gameState.gameHasStarted && !gameState.levelFinished) {
+      const interval = setInterval(() => {
+        updateGameState();
+      }, 1000);
+      return () => clearInterval(interval);
+    }
   }, [updateGameState, gameState.levelFinished, gameState.gameHasStarted]);
 
   useEffect(() => {
@@ -399,10 +411,16 @@ export default function Home() {
             gameState={gameState}
             level={level}
             startNextLevel={startNextLevel}
+            levelFailed={levelFailed}
+            restartGame={restartGame}
           />
         )}
         {showLevelFinished && isLastLevel && (
-          <EndScreen gameState={gameState} levels={levels} />
+          <EndScreen
+            gameState={gameState}
+            levels={levels}
+            restartGame={restartGame}
+          />
         )}
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
@@ -435,10 +453,14 @@ function FinishedLevelScreen({
   gameState,
   level,
   startNextLevel,
+  levelFailed,
+  restartGame,
 }: {
   gameState: IGameState;
   level: ILevel;
   startNextLevel: () => void;
+  levelFailed: boolean;
+  restartGame: () => void;
 }) {
   return (
     <div
@@ -449,18 +471,39 @@ function FinishedLevelScreen({
       }}
     >
       <h1 className="text-2xl font-bold">
-        Level {gameState.currentLevel} Completed!
+        {levelFailed ? (
+          <>Level {gameState.currentLevel} Failed!</>
+        ) : (
+          <>Level {gameState.currentLevel} Completed!</>
+        )}
       </h1>
       <LevelResultsBar gameState={gameState} level={level} />
       <GameResultsBar gameState={gameState} level={level} alignRight={false} />
-      <p className="text-sm">{level.postLevelMessage}</p>
+      <p className="text-sm">
+        {levelFailed ? (
+          <>
+            You need to get at least one point to finish each level. Please start the game again!
+          </>
+        ) : (
+          <>{level.postLevelMessage}</>
+        )}
+      </p>
       <div className="flex flex-col gap-4 items-end self-stretch">
-        <button
-          onClick={startNextLevel}
-          className="p-2 bg-blue-500 text-white rounded-lg"
-        >
-          Next Level
-        </button>
+        {levelFailed ? (
+          <button
+            onClick={restartGame}
+            className="p-2 bg-blue-500 text-white rounded-lg"
+          >
+            Restart Game
+          </button>
+        ) : (
+          <button
+            onClick={startNextLevel}
+            className="p-2 bg-blue-500 text-white rounded-lg"
+          >
+            Next Level
+          </button>
+        )}
       </div>
     </div>
   );
@@ -577,8 +620,8 @@ function LevelScreen({
       <LevelResultsBar gameState={gameState} level={level} />
       <textarea
         ref={textAreaRef}
-        cols={level.startContent[0].length}
-        rows={level.startContent.length}
+        cols={level.startContent[0].length + 1}
+        rows={level.startContent.length + 1}
         defaultValue={level.startContent.join("\r\n")}
         className="p-2 rounded-lg resize-none text-black font-extrabold"
         onKeyDown={handleKeyDown}
@@ -626,9 +669,11 @@ function StartScreen({ startGame }: { startGame: () => void }) {
 function EndScreen({
   gameState,
   levels,
+  restartGame,
 }: {
   gameState: IGameState;
   levels: ILevel[];
+  restartGame: () => void;
 }) {
   const lastLevel = levels[levels.length - 1];
   const allLevelGameStates = [...gameState.previousLevels, gameState];
@@ -646,9 +691,7 @@ function EndScreen({
       <GameResultsBar gameState={gameState} level={lastLevel} alignRight />
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
-          onClick={() => {
-            window.location.reload();
-          }}
+          onClick={restartGame}
           className="p-2 bg-blue-500 text-white rounded-lg"
         >
           Restart Game
