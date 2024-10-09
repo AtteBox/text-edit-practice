@@ -579,7 +579,7 @@ function LevelScreen({
         ref={textAreaRef}
         cols={level.startContent[0].length}
         rows={level.startContent.length}
-        defaultValue={level.startContent.join("\n")}
+        defaultValue={level.startContent.join("\r\n")}
         className="p-2 rounded-lg resize-none text-black font-extrabold"
         onKeyDown={handleKeyDown}
         onKeyUp={() => setCurrentKeyCombination(null)}
