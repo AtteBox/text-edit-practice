@@ -300,13 +300,13 @@ type ILevelState = {
   animals?: number;
   startTime: number;
   elapsedTime: number;
-  finished?: boolean;
+  levelFinished?: boolean;
 };
 
 type IGameState = {
   currentLevel: number;
   previousLevels: (ILevelState & { level: number })[];
-  hasStarted: boolean;
+  gameHasStarted: boolean;
 } & ILevelState;
 
 export default function Home() {
@@ -315,7 +315,7 @@ export default function Home() {
     startTime: 0,
     elapsedTime: 0,
     previousLevels: [],
-    hasStarted: false,
+    gameHasStarted: false,
   });
   const level = levels[gameState.currentLevel - 1];
 
@@ -330,15 +330,15 @@ export default function Home() {
     }));
   }, []);
 
-  const clearLevelTimer = useCallback(() => {
-    updateGameState({ startTime: Date.now(), elapsedTime: 0 });
-  }, [updateGameState]);
-
   const startNextLevel = useCallback(() => {
     setShowLevelFinished(false);
     setGameState((state) => ({
       ...state,
-      finished: false,
+      levelFinished: false,
+      germs: undefined,
+      animals: undefined,
+      startTime: Date.now(), 
+      elapsedTime: 0,
       currentLevel: state.currentLevel + 1,
       previousLevels: [
         ...state.previousLevels,
@@ -348,49 +348,50 @@ export default function Home() {
           animals: state.animals,
           startTime: state.startTime,
           elapsedTime: state.elapsedTime,
-          finished: true,
+          levelFinished: true,
         },
       ],
     }));
   }, []);
 
   const startGame = useCallback(
-    () => setGameState((state) => ({ ...state, hasStarted: true })),
+    () => setGameState((state) => ({ ...state, gameHasStarted: true, startTime: Date.now(), elapsedTime: 0 })),
     []
   );
 
   // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
-      updateGameState({ finished: true });
+      updateGameState({ levelFinished: true });
     }
   }, [gameState.germs, updateGameState]);
 
   useEffect(() => {
+    if(gameState.gameHasStarted && !gameState.levelFinished) {
     const interval = setInterval(() => {
       updateGameState();
     }, 1000);
     return () => clearInterval(interval);
-  }, [updateGameState]);
+  }
+  }, [updateGameState, gameState.levelFinished, gameState.gameHasStarted]);
 
   useEffect(() => {
-    if (gameState.finished) {
+    if (gameState.levelFinished) {
       setTimeout(() => {
         setShowLevelFinished(true);
       }, 1000);
     }
-  }, [gameState.finished]);
+  }, [gameState.levelFinished]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
-        {!gameState.hasStarted && <StartScreen startGame={startGame} />}
-        {gameState.hasStarted && !showLevelFinished && (
+        {!gameState.gameHasStarted && <StartScreen startGame={startGame} />}
+        {gameState.gameHasStarted && !showLevelFinished && (
           <LevelScreen
             level={level}
             gameState={gameState}
             updateLevelStats={updateGameState}
-            clearLevelTimer={clearLevelTimer}
           />
         )}
         {showLevelFinished && !isLastLevel && (
@@ -443,7 +444,7 @@ function FinishedLevelScreen({
     <div
       className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
       style={{
-        opacity: gameState.finished ? 1 : 0,
+        opacity: gameState.levelFinished ? 1 : 0,
         transition: "opacity 2s ease",
       }}
     >
@@ -469,7 +470,6 @@ function LevelScreen({
   level,
   gameState,
   updateLevelStats,
-  clearLevelTimer,
 }: {
   level: ILevel;
   gameState: IGameState;
@@ -480,7 +480,6 @@ function LevelScreen({
     germs: number;
     animals: number;
   }) => void;
-  clearLevelTimer: () => void;
 }) {
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
     string[] | null
@@ -490,7 +489,7 @@ function LevelScreen({
 
   // focus the text area when the level changes
   useEffect(() => {
-    if (!textAreaRef.current || !gameState.hasStarted) {
+    if (!textAreaRef.current || !gameState.gameHasStarted) {
       return;
     }
     textAreaRef.current.focus();
@@ -509,10 +508,9 @@ function LevelScreen({
       default:
         assertNever(level.cursorStartPos);
     }
-    clearLevelTimer();
-  }, [gameState.hasStarted, level.cursorStartPos, clearLevelTimer]);
+  }, [gameState.gameHasStarted, level.cursorStartPos]);
 
-  const handleKeyCombinationChange = (keyCombination: string[]) => {
+  const handleAllowedKeyCombination = (keyCombination: string[]) => {
     setCurrentKeyCombination(keyCombination);
 
     keysByLevel.current[gameState.currentLevel] = [
@@ -546,7 +544,7 @@ function LevelScreen({
         keyCombination.length === 1 &&
         e.key === keyCombination[0]
       ) {
-        handleKeyCombinationChange(keyCombination);
+        handleAllowedKeyCombination(keyCombination);
         return;
       }
       if (pressedModifierCount === 1 && keyCombination.length === 2) {
@@ -556,7 +554,7 @@ function LevelScreen({
           ctrlEquivalentPressed(e) &&
           e.key === keyName
         ) {
-          handleKeyCombinationChange(keyCombination);
+          handleAllowedKeyCombination(keyCombination);
           return;
         }
       }
@@ -569,7 +567,7 @@ function LevelScreen({
     <div
       className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
       style={{
-        opacity: gameState.finished ? 0 : 1,
+        opacity: gameState.levelFinished ? 0 : 1,
         transition: "opacity 1s ease",
       }}
     >

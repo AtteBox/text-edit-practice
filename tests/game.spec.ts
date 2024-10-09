@@ -20,10 +20,21 @@ test("when played through first level, show level results", async ({
     await textarea!.press(isMac ? key.replace("Control", "Alt") : key);
   }
   await expect(page.getByText("Level 1 Completed")).toBeVisible();
+  await expect(page.getByRole('button', {name: "Next Level"})).toBeVisible();
   for (const text of ["Germs: 0/69", "Animals: 44/44", "Difficulty: 100"]) {
     await expect(page.getByText(text, { exact: true })).toBeVisible();
   }
-  await expect(page.getByRole('button', {name: "Next Level"})).toBeVisible();
+  // points nor time should not change after level completion
+  const points = await extractPoints(page);
+  const time = await extractTime(page);
+  await page.waitForTimeout(2000);
+  await expect(extractPoints(page)).resolves.toBe(points);
+  await expect(extractTime(page)).resolves.toBe(time);
+
+  await expect(points).toBeGreaterThanOrEqual(0);
+  await expect(points).toBeLessThanOrEqual(200);
+  await expect(time).toBeGreaterThanOrEqual(0);
+  await expect(time).toBeLessThanOrEqual(100);
 });
 
 test("when played through the game, show finished game view and calculate total points correctly", async ({
@@ -35,6 +46,8 @@ test("when played through the game, show finished game view and calculate total 
   for (let i = 0; i < keysByLevel.length; i++) {
     const isLastLevel = i === keysByLevel.length - 1;
     await expect(page.getByText(`Level ${i + 1}`)).toBeVisible();
+    // points should be zero at the beginning of each level
+    await expect(extractPoints(page)).resolves.toBe(0);
     const textarea = await page.$("textarea");
     for (const key of keysByLevel[i]) {
       page.waitForTimeout(10);
@@ -66,6 +79,18 @@ async function extractPoints(page: Page) {
   }
   const pointsText = await points[points.length - 1].textContent();
   const match = pointsText!.match(pointsRegex);
+  return Number(match![1]);
+}
+
+/** Extracts time from the last "Time: " text on the page
+ * @param page
+ * @returns time as integer
+ * */
+async function extractTime(page: Page) {
+  const timeRegex = /^Time: ([0-9]+)\//;
+  const time = await page.getByText(timeRegex, { exact: true });
+  const timeText = await time.textContent();
+  const match = timeText!.match(timeRegex);
   return Number(match![1]);
 }
 
