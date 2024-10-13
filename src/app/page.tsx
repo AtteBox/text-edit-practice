@@ -406,12 +406,17 @@ export default function Home() {
             updateLevelStats={updateGameState}
           />
         )}
-        {showLevelFinished && !isLastLevel && (
+        {showLevelFinished && !isLastLevel && !levelFailed && (
           <FinishedLevelScreen
             gameState={gameState}
             level={level}
             startNextLevel={startNextLevel}
-            levelFailed={levelFailed}
+          />
+        )}
+        {showLevelFinished && levelFailed && (
+          <FailedLevelScreen
+            gameState={gameState}
+            level={level}
             restartGame={restartGame}
           />
         )}
@@ -453,13 +458,44 @@ function FinishedLevelScreen({
   gameState,
   level,
   startNextLevel,
-  levelFailed,
-  restartGame,
 }: {
   gameState: IGameState;
   level: ILevel;
   startNextLevel: () => void;
-  levelFailed: boolean;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md"
+      style={{
+        opacity: gameState.levelFinished ? 1 : 0,
+        transition: "opacity 2s ease",
+      }}
+    >
+      <h1 className="text-2xl font-bold">Level {gameState.currentLevel} Completed!
+      </h1>
+      <LevelResultsBar gameState={gameState} level={level} />
+      <GameResultsBar gameState={gameState} level={level} alignRight={false} />
+      <p className="text-sm">{level.postLevelMessage}
+      </p>
+      <div className="flex flex-col gap-4 items-end self-stretch">
+          <button
+            onClick={startNextLevel}
+            className="p-2 bg-blue-500 text-white rounded-lg"
+          >
+            Next Level
+          </button>
+      </div>
+    </div>
+  );
+}
+
+function FailedLevelScreen({
+  gameState,
+  level,
+  restartGame,
+}: {
+  gameState: IGameState;
+  level: ILevel;
   restartGame: () => void;
 }) {
   return (
@@ -471,39 +507,20 @@ function FinishedLevelScreen({
       }}
     >
       <h1 className="text-2xl font-bold">
-        {levelFailed ? (
-          <>Level {gameState.currentLevel} Failed!</>
-        ) : (
-          <>Level {gameState.currentLevel} Completed!</>
-        )}
+        Level {gameState.currentLevel} Failed!
       </h1>
       <LevelResultsBar gameState={gameState} level={level} />
       <GameResultsBar gameState={gameState} level={level} alignRight={false} />
       <p className="text-sm">
-        {levelFailed ? (
-          <>
-            You need to get at least one point to finish each level. Please start the game again!
-          </>
-        ) : (
-          <>{level.postLevelMessage}</>
-        )}
+        You need to get at least one point to finish each level. Please start the game again!
       </p>
       <div className="flex flex-col gap-4 items-end self-stretch">
-        {levelFailed ? (
           <button
             onClick={restartGame}
             className="p-2 bg-blue-500 text-white rounded-lg"
           >
             Restart Game
           </button>
-        ) : (
-          <button
-            onClick={startNextLevel}
-            className="p-2 bg-blue-500 text-white rounded-lg"
-          >
-            Next Level
-          </button>
-        )}
       </div>
     </div>
   );
