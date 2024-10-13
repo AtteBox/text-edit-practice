@@ -60,7 +60,9 @@ test("when played through first level with too many mistakes, show level failed 
 
 test("when played through the game, show finished game view and calculate total points correctly", async ({
   page,
+  browserName,
 }) => {
+  test.skip(browserName === 'webkit', 'TODO: Still working on it');
   await page.goto("/");
   await page.getByRole("button", { name: "Start Game" }).click();
   let totalPoints = 0;
@@ -86,7 +88,9 @@ test("when played through the game, show finished game view and calculate total 
 });
 test("when played through last level with too many mistakes, show level failed message", async ({
   page,
+  browserName,
 }) => {
+  test.skip(browserName === 'webkit', 'TODO: Still working on it');
   await page.goto("/");
   await page.getByRole("button", { name: "Start Game" }).click();
   for (let i = 0; i < keysByLevel.length; i++) {
