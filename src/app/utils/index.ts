@@ -3,7 +3,7 @@ export function isMac() {
 }
 
 export function ctrlEquivalentPressed(
-  event: KeyboardEvent | globalThis.KeyboardEvent
+  event: KeyboardEvent | globalThis.KeyboardEvent,
 ) {
   return isMac() ? event.altKey : event.ctrlKey;
 }
@@ -11,7 +11,7 @@ export function ctrlEquivalentPressed(
 /**
  * Call this function to assert that the code should never be reached.
  * For instance, in a switch statement, if all cases are handled, the default case should never be reached
- * @param cursorStartPos 
+ * @param cursorStartPos
  */
 export function assertNever(cursorStartPos: never): never {
   throw new Error(`Unexpected cursor position: ${cursorStartPos}`);

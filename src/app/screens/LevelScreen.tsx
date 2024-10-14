@@ -7,7 +7,7 @@ import { IGameEngineResult } from "../engines/game";
 
 function LevelScreen({ game }: { game: IGameEngineResult }) {
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
-    game
+    game,
   });
   const level = game.currentLevel;
 
@@ -93,10 +93,10 @@ function KeyCombinationTag({
   let actualKeyCombination = keyCombination;
   if (isMac()) {
     actualKeyCombination = actualKeyCombination.map((key) =>
-      key === "ctrl" ? "option" : key
+      key === "ctrl" ? "option" : key,
     );
     actualKeyCombination = actualKeyCombination.flatMap((key) =>
-      key === "Delete" ? ["fn", "Backspace"] : key
+      key === "Delete" ? ["fn", "Backspace"] : key,
     );
   }
   return (
@@ -116,7 +116,7 @@ function KeyCombinationTag({
         {keyCombination.reduce(
           //@ts-expect-error "TODO: typescript typing of this reduce"
           (acc, curr) => acc[curr],
-          keyCombinationExplanation
+          keyCombinationExplanation,
         )}
         )
       </span>

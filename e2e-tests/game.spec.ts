@@ -46,7 +46,7 @@ test("when played through first level with too many mistakes, show level failed 
   }
   await expect(page.getByText("Level 1 Failed")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Restart Game" })
+    page.getByRole("button", { name: "Restart Game" }),
   ).toBeVisible();
   for (const text of ["Germs: 0/69", "Animals: 2/44", "Difficulty: 100"]) {
     await expect(page.getByText(text, { exact: true })).toBeVisible();
@@ -62,7 +62,7 @@ test("when played through the game, show finished game view and calculate total 
   page,
   browserName,
 }) => {
-  test.skip(browserName === 'webkit', 'TODO: Still working on it');
+  test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
   await page.getByRole("button", { name: "Start Game" }).click();
   let totalPoints = 0;
@@ -90,7 +90,7 @@ test("when played through last level with too many mistakes, show level failed m
   page,
   browserName,
 }) => {
-  test.skip(browserName === 'webkit', 'TODO: Still working on it');
+  test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
   await page.getByRole("button", { name: "Start Game" }).click();
   for (let i = 0; i < keysByLevel.length; i++) {
@@ -103,7 +103,7 @@ test("when played through last level with too many mistakes, show level failed m
     if (isLastLevel) {
       await expect(page.getByText(`Level ${i + 1} Failed`)).toBeVisible();
       await expect(
-        page.getByText(`Level ${i + 1} Completed`)
+        page.getByText(`Level ${i + 1} Completed`),
       ).not.toBeVisible();
     } else {
       await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
