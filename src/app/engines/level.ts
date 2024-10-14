@@ -3,14 +3,10 @@ import { assertNever, ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
 
-export function useLevelEngine({
-  game,
-}: {
-  game: IGameEngineResult;
-}) {
+export function useLevelEngine({ game }: { game: IGameEngineResult }) {
   const level = game.currentLevel;
   const [gameMap, setGameMap] = useState<string>(
-    startContentToText(level.startContent)
+    startContentToText(level.startContent),
   );
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
     string[] | null
@@ -25,7 +21,7 @@ export function useLevelEngine({
   // when level changes, reset the cursor position
   useEffect(() => {
     const levelTextLength = Array.from(
-      startContentToText(level.startContent)
+      startContentToText(level.startContent),
     ).length;
     switch (level.cursorStartPos) {
       case "start":
@@ -51,14 +47,14 @@ export function useLevelEngine({
       const { cursorPos: newCursorPos, text: newGameMap } = calcTextarea(
         cursorPos,
         gameMap,
-        keyCombination
+        keyCombination,
       );
       setGameMap(newGameMap);
       setCursorPos(newCursorPos);
 
-      updateLevelStats({textContent: newGameMap });
+      updateLevelStats({ textContent: newGameMap });
     },
-    [gameMap, cursorPos, updateLevelStats]
+    [gameMap, cursorPos, updateLevelStats],
   );
 
   const handleKeyDown = useCallback(
@@ -93,7 +89,7 @@ export function useLevelEngine({
       // prevent disallowed key combinations
       e.preventDefault();
     },
-    [handleAllowedKeyCombination, level.allowedKeyCombinations]
+    [handleAllowedKeyCombination, level.allowedKeyCombinations],
   );
 
   const handleKeyUp = useCallback(() => {
@@ -109,12 +105,7 @@ export function useLevelEngine({
         document.removeEventListener("keyup", handleKeyUp);
       };
     }
-  }, [
-    game.gameHasStarted,
-    game.levelFinished,
-    handleKeyDown,
-    handleKeyUp,
-  ]);
+  }, [game.gameHasStarted, game.levelFinished, handleKeyDown, handleKeyUp]);
 
   return { gameMap, currentKeyCombination, cursorPos };
 }

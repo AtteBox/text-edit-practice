@@ -114,10 +114,10 @@ describe("calcTextarea", () => {
       expect(result).toEqual({ cursorPos: 3, text: "a b c" });
     });
     it("Backspace with control in the middle of the text should delete the previous word", () => {
-        const text = "adf sdlfj ldsjfq sdfsd";
-        const cursorPos = 16;
-        const result = calcTextarea(cursorPos, text, ["ctrl", "Backspace"]);
-        expect(result).toEqual({ cursorPos: 10, text: "adf sdlfj  sdfsd" });
+      const text = "adf sdlfj ldsjfq sdfsd";
+      const cursorPos = 16;
+      const result = calcTextarea(cursorPos, text, ["ctrl", "Backspace"]);
+      expect(result).toEqual({ cursorPos: 10, text: "adf sdlfj  sdfsd" });
     });
   });
 

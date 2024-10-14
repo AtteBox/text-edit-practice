@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Roboto_Mono } from 'next/font/google'
+import { Roboto_Mono } from "next/font/google";
 
 import "./globals.css";
 
@@ -19,10 +19,9 @@ const geistMono = localFont({
 });
 
 const roboto_mono = Roboto_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-})
- 
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Typo Terminator",
@@ -36,11 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={roboto_mono.className}
-      >
-        {children}
-      </body>
+      <body className={roboto_mono.className}>{children}</body>
     </html>
   );
 }

@@ -1,7 +1,7 @@
 export function calcTextarea(
   cursorPos: number,
   text: string,
-  keyCombination: string[]
+  keyCombination: string[],
 ): { cursorPos: number; text: string } {
   // Convert text to an array of characters
   function isWordCharacter(char: string): boolean {
@@ -68,17 +68,17 @@ export function calcTextarea(
       case "ArrowRight": {
         let pos = cursorPos;
         const len = characters.length;
-      
+
         // Skip non-word characters (including line breaks)
         while (pos < len && !isWordCharacter(characters[pos])) {
           pos++;
         }
-      
+
         // Skip word characters to the end of the next word
         while (pos < len && isWordCharacter(characters[pos])) {
           pos++;
         }
-      
+
         return { cursorPos: pos, text: text };
       }
       case "Backspace": {

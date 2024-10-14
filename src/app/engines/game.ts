@@ -113,7 +113,7 @@ export function useGameEngine({
         startTime: Date.now(),
         elapsedTime: 0,
       })),
-    []
+    [],
   );
 
   const restartGame = useCallback(() => {
@@ -126,27 +126,27 @@ export function useGameEngine({
       const animals = getAnimalCount(textContent);
       updateGameState({ germs, animals });
     },
-    [updateGameState]
+    [updateGameState],
   );
 
   const currentLevelPoints = useMemo(
     () => calcPoints(gameState, level),
-    [gameState, level]
+    [gameState, level],
   );
 
   const totalPoints = useMemo(
     () => calcTotalPoints(gameState, level, levels),
-    [gameState, level, levels]
+    [gameState, level, levels],
   );
 
   const levelTotalGerms = useMemo(
     () => getGermCount(level.startContent.join("")),
-    [level.startContent]
+    [level.startContent],
   );
 
   const levelTotalAnimals = useMemo(
     () => getAnimalCount(level.startContent.join("")),
-    [level.startContent]
+    [level.startContent],
   );
 
   const previousLevels = useMemo(
@@ -166,7 +166,7 @@ export function useGameEngine({
           currentLevelPoints: calcPoints(levelState, previousLevel),
         };
       }),
-    [gameState.previousLevels, levels]
+    [gameState.previousLevels, levels],
   );
 
   // when there are no germs left, show the level finished animation
@@ -221,26 +221,26 @@ function calcPoints(gameState: ILevelState, level: ILevel) {
   const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
   const timeRatio = -Math.max(
     gameState.elapsedTime / 1000 / level.targetTimeSeconds,
-    0
+    0,
   );
   return Math.max(
     Math.floor(
-      (germRatio + 2 * animalRatio + timeRatio) * level.pointCoefficient
+      (germRatio + 2 * animalRatio + timeRatio) * level.pointCoefficient,
     ),
-    0
+    0,
   );
 }
 
 function calcTotalPoints(
   gameState: IGameState,
   currentLevel: ILevel,
-  levels: ILevel[]
+  levels: ILevel[],
 ) {
   return (
     gameState.previousLevels.reduce(
       (acc, levelState) =>
         acc + calcPoints(levelState, levels[levelState.level - 1]),
-      0
+      0,
     ) + calcPoints(gameState, currentLevel)
   );
 }
