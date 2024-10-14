@@ -1,9 +1,8 @@
-import { assertNever, isMac } from "../utils";
+import { isMac } from "../utils";
 import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
-import { ICursorStartPos } from "../levels";
 
 function LevelScreen({ game }: { game: IGameEngineResult }) {
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
@@ -26,7 +25,7 @@ function LevelScreen({ game }: { game: IGameEngineResult }) {
       <GameMap gameMap={gameMap} cursorPos={cursorPos} />
       <div>
         <span className="text-sm">Allowed key combinations:</span>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap grow-0 gap-1">
           {level.allowedKeyCombinations.map((keyCombination) => (
             <KeyCombinationTag
               key={keyCombination.join("-")}
@@ -36,27 +35,11 @@ function LevelScreen({ game }: { game: IGameEngineResult }) {
           ))}
         </div>
       </div>
-      <p className="text-sm">
-        Note: The cursor is {getCursorText(level.cursorStartPos)}.
-      </p>
     </div>
   );
 }
 
 export default LevelScreen;
-
-function getCursorText(cursorStartPos: ICursorStartPos): string {
-  switch (cursorStartPos) {
-    case "start":
-      return "at the beginning";
-    case "middle":
-      return "in the middle";
-    case "end":
-      return "at the end";
-    default:
-      assertNever(cursorStartPos);
-  }
-}
 
 function KeyCombinationTag({
   keyCombination,
@@ -79,15 +62,15 @@ function KeyCombinationTag({
     string | Record<string, string>
   > = {
     ctrl: {
-      Backspace: "Remove word to the left",
-      ArrowLeft: "Move cursor to the left word",
-      ArrowRight: "Move cursor to the right word",
-      Delete: "Delete word to the right",
+      Backspace: "remove left word",
+      ArrowLeft: "move a word left",
+      ArrowRight: "move a word right",
+      Delete: "remove right word",
     },
-    Backspace: "Delete character to the left",
-    ArrowLeft: "Move to the character on the left",
-    ArrowRight: "Move to the character on the right",
-    Delete: "Delete character to the right",
+    Backspace: "remove letter on left",
+    ArrowLeft: "move a letter left",
+    ArrowRight: "move a letter right",
+    Delete: "remove letter on right",
   };
 
   let actualKeyCombination = keyCombination;
@@ -100,17 +83,18 @@ function KeyCombinationTag({
     );
   }
   return (
-    <div className="inline-block m-2">
+    <div className="flex flex-col items-center m-2 text-xs">
       <span
-        className="inline-block p-2 bg-gray-100 rounded-lg text-black m-1"
+        className="inline-block p-2 rounded-lg text-black m-1"
         style={{
-          backgroundColor: isPressed ? "green" : "white",
+          backgroundImage: isPressed
+            ? "radial-gradient(#00AA00, #006600)"
+            : "radial-gradient(#6689A0, #607495)",
           transition: isPressed ? "none" : "background-color 1s ease",
         }}
       >
         {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
       </span>
-      <br />
       <span className="text-xs">
         (
         {keyCombination.reduce(
@@ -146,8 +130,9 @@ function GameMap({
       style={{
         minWidth: "450px",
         minHeight: "100px",
+        backgroundImage: "radial-gradient(#6689A0, #364970)",
       }}
-      className="font-mono whitespace-pre-wrap break-words relative text-white bg-gray-800 rounded-md m-2 p-3"
+      className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
     >
       <style>{blinkAnimation}</style>
       {characters.map((char, index) => (

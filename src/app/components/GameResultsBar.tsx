@@ -8,7 +8,7 @@ export function GameResultsBar({
   alignRight?: boolean;
 }) {
   return (
-    <span className={"text-xs" + alignRight ? " self-end" : " self-start"}>
+    <span className={"text-xs" + (alignRight ? " self-end" : " self-start")}>
       Total Points: {game.totalPoints}
     </span>
   );

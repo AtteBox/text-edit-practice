@@ -19,7 +19,7 @@ function EndScreen({ game }: { game: IGameEngineResult }) {
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
           onClick={game.restartGame}
-          className="p-2 bg-blue-500 text-white rounded-lg"
+          className="p-2 rounded-md bg-violet-600 hover:bg-violet-700 active:bg-violet-800 focus:outline-none focus:ring focus:ring-violet-300"
         >
           Restart Game
         </button>
