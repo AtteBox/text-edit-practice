@@ -44,7 +44,6 @@ export type IGameEngineResult = {
   startNextLevel: () => void;
   gameHasStarted: boolean;
   levelFinished: boolean;
-  showLevelFinished: boolean; // TODO: remove animation stuff from here
   isLastLevel: boolean;
   levelFailed: boolean;
   startGame: () => void;
@@ -67,8 +66,6 @@ export function useGameEngine({
   });
   const level = levels[gameState.currentLevel - 1];
 
-  // TODO: this animation related stuff should not be here (showLevelFinished)
-  const [showLevelFinished, setShowLevelFinished] = useState(false);
   const isLastLevel = gameState.currentLevel === levels.length;
   const levelFailed =
     !!gameState.levelFinished && calcPoints(gameState, level) <= 1;
@@ -82,7 +79,6 @@ export function useGameEngine({
   }, []);
 
   const startNextLevel = useCallback(() => {
-    setShowLevelFinished(false);
     setGameState((state) => ({
       ...state,
       levelFinished: false,
@@ -185,15 +181,7 @@ export function useGameEngine({
     }
   }, [updateGameState, gameState.levelFinished, gameState.gameHasStarted]);
 
-  useEffect(() => {
-    if (gameState.levelFinished) {
-      setTimeout(() => {
-        setShowLevelFinished(true);
-      }, 1000);
-    }
-  }, [gameState.levelFinished]);
   return {
-    showLevelFinished,
     isLastLevel,
     levelFailed,
     startNextLevel,
