@@ -16,7 +16,7 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
           onClick={game.startGame}
           className="p-2 bg-blue-500 text-white rounded-lg"
         >
-          Start Games
+          Start Game
         </button>
       </div>
     </div>
