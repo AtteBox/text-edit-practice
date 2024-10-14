@@ -9,12 +9,11 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
       <p className="text-sm">
         A game where you eliminate unwanted characters swiftly!
       </p>
-      s
       <Image src={startBanner} alt="Typo Terminator Banner" />
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
           onClick={game.startGame}
-          className="p-2 bg-blue-500 text-white rounded-lg"
+          className="p-2 rounded-md bg-violet-600 hover:bg-violet-700 active:bg-violet-800 focus:outline-none focus:ring focus:ring-violet-300"
         >
           Start Game
         </button>
