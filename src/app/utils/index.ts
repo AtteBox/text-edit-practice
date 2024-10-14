@@ -16,3 +16,14 @@ export function ctrlEquivalentPressed(
 export function assertNever(cursorStartPos: never): never {
   throw new Error(`Unexpected cursor position: ${cursorStartPos}`);
 }
+
+/**
+ * Get a color for a ratio where 0 is bad and 1 is good
+ * @param ratio number between 0-1
+ * @returns css color string
+ */
+export function getDangerColor(ratio: number): string {
+  const red = 255 * Math.min(1, 2 * ratio);
+  const green = 255 * Math.min(1, 2 - 2 * ratio);
+  return `rgb(${red}, ${green}, 0)`;
+}
