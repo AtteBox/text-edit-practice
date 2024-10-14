@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAnimalCount, getGermCount, ILevel } from "../domain";
+import { animalChars, germChars, ILevel } from "../levels";
 
 /**
  * Internal state of the game engine for a single level
@@ -243,4 +243,24 @@ function calcTotalPoints(
       0,
     ) + calcPoints(gameState, currentLevel)
   );
+}
+
+export function getAnimalCount(text: string) {
+  let count = 0;
+  for (const char of text) {
+    if (animalChars.includes(char)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+export function getGermCount(text: string) {
+  let count = 0;
+  for (const char of text) {
+    if (germChars.includes(char)) {
+      count++;
+    }
+  }
+  return count;
 }

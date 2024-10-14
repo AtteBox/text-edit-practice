@@ -1,5 +1,5 @@
-import { getDangerColor } from "../domain";
 import { ILevelResult } from "../engines/game";
+import { getDangerColor } from "../utils";
 
 function LevelResultsBar({ levelResults }: { levelResults: ILevelResult }) {
   const level = levelResults.currentLevel;

@@ -1,9 +1,9 @@
-import { ICursorStartPos } from "../domain";
 import { assertNever, isMac } from "../utils";
 import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
+import { ICursorStartPos } from "../levels";
 
 function LevelScreen({ game }: { game: IGameEngineResult }) {
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({

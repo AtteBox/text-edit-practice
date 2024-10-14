@@ -1,4 +1,63 @@
-import { ILevel } from "../domain";
+export type ICursorStartPos = "start" | "middle" | "end";
+
+export type ILevel = {
+  title: string;
+  description: string;
+  startContent: string[];
+  allowedKeyCombinations: string[][];
+  cursorStartPos: ICursorStartPos;
+  postLevelMessage: string;
+  targetTimeSeconds: number;
+  pointCoefficient: number;
+};
+
+export const germChars = ["🦠", "🕷"];
+export const animalChars = [
+  "🐶",
+  "🐱",
+  "🐭",
+  "🐹",
+  "🐰",
+  "🦊",
+  "🐻",
+  "🐼",
+  "🐨",
+  "🐯",
+  "🦁",
+  "🐮",
+  "🐷",
+  "🐽",
+  "🐸",
+  "🐵",
+  "🙈",
+  "🙉",
+  "🙊",
+  "🐔",
+  "🐧",
+  "🐦",
+  "🐤",
+  "🐣",
+  "🐥",
+  "🦆",
+  "🦅",
+  "🦉",
+  "🦇",
+  "🐺",
+  "🐗",
+  "🐴",
+  "🦄",
+  "🐝",
+  "🐛",
+  "🦋",
+  "🐌",
+  "🐚",
+  "🐞",
+  "🐜",
+  "🦂",
+  "🐢",
+  "🐍",
+  "🐊",
+];
 
 export const levels: ILevel[] = [
   {
