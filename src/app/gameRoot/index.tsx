@@ -2,11 +2,11 @@
 
 import { useGameEngine } from "../engines/game";
 import { levels } from "../levels";
-import EndScreen from "../screens/endScreen";
-import FailedLevelScreen from "../screens/failedLevelScreen";
-import FinishedLevelScreen from "../screens/finishedLevelScreen";
-import LevelScreen from "../screens/levelScreen";
-import StartScreen from "../screens/startScreen";
+import EndScreen from "../screens/EndScreen";
+import FailedLevelScreen from "../screens/FailedLevelScreen";
+import FinishedLevelScreen from "../screens/FinishedLevelScreen";
+import LevelScreen from "../screens/LevelScreen";
+import StartScreen from "../screens/StartScreen";
 
 export function GameRoot() {
     const game = useGameEngine({levels});
