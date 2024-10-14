@@ -11,10 +11,10 @@ export function ctrlEquivalentPressed(
 /**
  * Call this function to assert that the code should never be reached.
  * For instance, in a switch statement, if all cases are handled, the default case should never be reached
- * @param cursorStartPos
+ * @param value
  */
-export function assertNever(cursorStartPos: never): never {
-  throw new Error(`Unexpected cursor position: ${cursorStartPos}`);
+export function assertNever(value: never): never {
+  throw new Error(`Unhandled alternative: ${value}`);
 }
 
 /**
