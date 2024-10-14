@@ -636,14 +636,20 @@ function LevelScreen({
     [handleAllowedKeyCombination, level.allowedKeyCombinations]
   );
 
+  const handleKeyUp = useCallback(() => {
+    setCurrentKeyCombination(null);
+  }, []);
+
   useEffect(() => {
     if (gameState.gameHasStarted && !gameState.levelFinished) {
       document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
       return () => {
         document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
       };
     }
-  }, [gameState.gameHasStarted, gameState.levelFinished, handleKeyDown]);
+  }, [gameState.gameHasStarted, gameState.levelFinished, handleKeyDown, handleKeyUp]);
 
   return (
     <div
@@ -884,18 +890,44 @@ function GameMap({
   gameMap: string;
   cursorPos: number;
 }) {
-  // Convert the string to an array of characters
   const characters = Array.from(gameMap);
 
+  // Define the keyframes for the blink animation
+  const blinkAnimation = `
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+    `;
+
   return (
-    <pre>
-      {characters.map((char, index) => {
-        if (index === cursorPos) {
-          return <span key={index}>|{char}</span>;
-        }
-        return char;
-      })}
-      {cursorPos === characters.length && <span key="end cursor">{"|"}</span>}
+    <pre
+      style={{
+        minWidth: "450px",
+        minHeight: "100px",
+      }}
+      className="font-mono whitespace-pre-wrap break-words relative text-white bg-gray-800 rounded-md m-2 p-3"
+    >
+      <style>{blinkAnimation}</style>
+      {characters.map((char, index) => (
+        <span key={index} className="relative">
+          {index === cursorPos && (
+            <span
+              className="absolute inset-0 h-full w-0.5 bg-white"
+              style={{ animation: "blink 0.7s linear infinite" }}
+            />
+          )}
+          {char}
+        </span>
+      ))}
+      {cursorPos === characters.length && (
+        <span className="relative">
+          <span
+            className="absolute left-0 top-0 h-full w-0.5 bg-white"
+            style={{ animation: "blink 0.7s linear infinite" }}
+          />
+        </span>
+      )}
     </pre>
   );
 }
