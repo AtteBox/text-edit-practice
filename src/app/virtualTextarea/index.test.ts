@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calcTextarea } from "./virtualTextarea";
+import { calcTextarea } from ".";
 
 describe("calcTextarea", () => {
   describe("Single key operations", () => {
