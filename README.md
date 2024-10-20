@@ -1,44 +1,78 @@
-# About
+# Typo Terminator
 
-"Typo Terminator" is a game for practicing basic text editing using the keyboard.
+"Typo Terminator" is a web-based game for practicing basic text editing using a keyboard.
 
 The main-branch is being automatically deployed here: https://main.d2rz08zw1ht14m.amplifyapp.com/
 
-# NextJS
+## Idea / Background
+
+> The idea was to create a game where I myself can practice text editing, both on Windows PCs and Macs. I decided to develop the game using React as I am most familiar and productive with it. However, I chose to use NextJS, which I don't use at work, to get more familiar with it.
+
+## Features
+
+- (should) work on all major browsers on Macs and Windows PCs
+- levels have a data structure and are defined as data
+- supported keys are backspace, delete and the right and left arrows together with the control/option key
+- "the text" is manipulated using a virtual text area/editor
+- 5 different levels
+
+## About the code
+
+**The aim was to develop the game as rapidly as possible**, and thus using familiar technologies ([React](https://react.dev/), [Playwright](https://playwright.dev/)). I also, of course, used AI to generate as much as possible of the code and content: mostly just [Github Copilot's](https://github.com/features/copilot) autocomplete, but also [ChatGPT](https://chatgpt.com/) for the level content.
+
+## Developing
+
+Prerequisites:
+- Node.js > 20
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
 
 First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+NextJS came with linting but Prettier was added for formatting:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
+```bash
+npm run format
+npm run lint
+```
 
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Testing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### E2E Tests
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The game is tested using [Playwright](https://playwright.dev/). The tests are located in the `e2e-tests`-folder. You can run the tests using:
+
+```bash
+npm run test:e2e
+```
+
+You can also run the tests in UI-mode (good while developing):
+
+```bash
+npm run test:e2e:ui
+```
+
+### Unit Tests
+
+The virtual text area/editor became so complex that it is more specifically tested using [Vitest](https://vitest.dev/) unit tests. Unit tests can of course easily by added wherever needed. These tests are located side-by-side with the production code files in the `src`-folder. You can run the tests using:
+
+```bash
+npm run test
+```
+
+## Deployment
+
+The game is deployed using [AWS Amplify](https://docs.aws.amazon.com/amplify/latest/userguide/welcome.html) (which has support for [NextJS in some degree](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-amplify-support.html)). The deployment is triggered by pushing to the main-branch.
+
