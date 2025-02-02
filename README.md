@@ -23,10 +23,10 @@ The main-branch is being automatically deployed here: https://main.d2rz08zw1ht14
 ## Developing
 
 Prerequisites:
+
 - Node.js > 20
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 
 First, run the development server:
 
@@ -46,7 +46,6 @@ npm run lint
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-
 
 ## Testing
 
@@ -75,4 +74,3 @@ npm run test
 ## Deployment
 
 The game is deployed using [AWS Amplify](https://docs.aws.amazon.com/amplify/latest/userguide/welcome.html) (which has support for [NextJS in some degree](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-amplify-support.html)). The deployment is triggered by pushing to the main-branch.
-
