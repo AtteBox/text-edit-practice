@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { assertNever, ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
+import { ICursorStartPos } from "../levels";
 
 export function useLevelEngine({ game }: { game: IGameEngineResult }) {
   const level = game.currentLevel;
@@ -20,22 +21,9 @@ export function useLevelEngine({ game }: { game: IGameEngineResult }) {
 
   // when level changes, reset the cursor position
   useEffect(() => {
-    const levelTextLength = Array.from(
-      startContentToText(level.startContent),
-    ).length;
-    switch (level.cursorStartPos) {
-      case "start":
-        setCursorPos(0);
-        break;
-      case "middle":
-        setCursorPos(Math.floor(levelTextLength / 2));
-        break;
-      case "end":
-        setCursorPos(levelTextLength);
-        break;
-      default:
-        assertNever(level.cursorStartPos);
-    }
+    setCursorPos(
+      getActualInitialCursorPos(level.cursorStartPos, level.startContent),
+    );
   }, [level.cursorStartPos, level.startContent]);
 
   const updateLevelStats = game.updateLevelStats;
@@ -110,6 +98,28 @@ export function useLevelEngine({ game }: { game: IGameEngineResult }) {
   return { gameMap, currentKeyCombination, cursorPos };
 }
 
-function startContentToText(startContent: string[]) {
+export function getActualInitialCursorPos(
+  cursorStartPos: ICursorStartPos,
+  levelStartContent: string[],
+): number {
+  const levelTextLength = Array.from(
+    startContentToText(levelStartContent),
+  ).length;
+  switch (cursorStartPos) {
+    case "start":
+      return 0;
+      break;
+    case "middle":
+      return Math.floor(levelTextLength / 2);
+      break;
+    case "end":
+      return levelTextLength;
+      break;
+    default:
+      assertNever(cursorStartPos);
+  }
+}
+
+export function startContentToText(startContent: string[]) {
   return startContent.join("\n");
 }
