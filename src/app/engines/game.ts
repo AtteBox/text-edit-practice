@@ -36,14 +36,18 @@ export type ILevelResult = {
   currentLevelPoints: number;
 };
 
+/**
+ * Username validation schema
+ */
 const usernameSchema = z
-.string()
-.min(2, {message: "Username must be at least 2 characters long"})
-.max(100, {message: "Username must be at most 100 characters long"})
-.regex(
-  /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
-  "Username must consist of letters, digits and spaces. There must be at least one letter. Multiple consecutive spaces are not allowed."
-);
+  .string()
+  .min(2, { message: "Username must be at least 2 characters long" })
+  .max(100, { message: "Username must be at most 100 characters long" })
+  .regex(
+    /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
+    "Username must consist of letters, digits and spaces. There must be at least one letter. Multiple consecutive spaces are not allowed.",
+  );
+const defaultUsernameError = "Invalid username";
 
 /**
  * External api of the game engine for the whole game
@@ -112,23 +116,28 @@ export function useGameEngine({
     }));
   }, []);
 
-  const startGame = useCallback(
-    (username: string) => {
-      const {error, data: validatedUsername} = usernameSchema.safeParse(username)
-      if (error) {
-        return {error: error.issues[0].message}
-      }
-      
-      setGameState((state) => ({
-        ...state,
-        gameHasStarted: true,
-        username: validatedUsername,
-        startTime: Date.now(),
-        elapsedTime: 0,
-      }))
+  const startGame = useCallback((username: string) => {
+    const { error, data: validatedUsername } =
+      usernameSchema.safeParse(username);
+    if (error) {
+      return {
+        error:
+          error.issues.length > 0
+            ? error.issues[0].message
+            : defaultUsernameError,
+      };
+    }
 
-      return {error: undefined}
-}, []);
+    setGameState((state) => ({
+      ...state,
+      gameHasStarted: true,
+      username: validatedUsername,
+      startTime: Date.now(),
+      elapsedTime: 0,
+    }));
+
+    return { error: undefined };
+  }, []);
 
   const restartGame = useCallback(() => {
     window.location.reload();
