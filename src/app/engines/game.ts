@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { animalChars, germChars, ILevel } from "../levels";
+import { z } from "zod";
 
 /**
  * Internal state of the game engine for a single level
@@ -16,6 +17,7 @@ type ILevelState = {
  * Internal state of the game engine for the whole game
  */
 type IGameState = {
+  username?: string;
   currentLevel: number;
   previousLevels: (ILevelState & { level: number })[];
   gameHasStarted: boolean;
@@ -34,6 +36,15 @@ export type ILevelResult = {
   currentLevelPoints: number;
 };
 
+const usernameSchema = z
+.string()
+.min(2, {message: "Username must be at least 2 characters long"})
+.max(100, {message: "Username must be at most 100 characters long"})
+.regex(
+  /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
+  "Username must consist of letters, digits and spaces. There must be at least one letter. Multiple consecutive spaces are not allowed."
+);
+
 /**
  * External api of the game engine for the whole game
  */
@@ -46,7 +57,7 @@ export type IGameEngineResult = {
   levelFinished: boolean;
   isLastLevel: boolean;
   levelFailed: boolean;
-  startGame: () => void;
+  startGame: (username: string) => { error: string | undefined };
   updateLevelStats: ({ textContent }: { textContent: string }) => void;
   previousLevels: ILevelResult[];
 } & ILevelResult;
@@ -102,15 +113,22 @@ export function useGameEngine({
   }, []);
 
   const startGame = useCallback(
-    () =>
+    (username: string) => {
+      const {error, data: validatedUsername} = usernameSchema.safeParse(username)
+      if (error) {
+        return {error: error.issues[0].message}
+      }
+      
       setGameState((state) => ({
         ...state,
         gameHasStarted: true,
+        username: validatedUsername,
         startTime: Date.now(),
         elapsedTime: 0,
-      })),
-    [],
-  );
+      }))
+
+      return {error: undefined}
+}, []);
 
   const restartGame = useCallback(() => {
     window.location.reload();
