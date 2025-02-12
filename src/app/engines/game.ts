@@ -41,11 +41,11 @@ export type ILevelResult = {
  */
 const usernameSchema = z
   .string()
-  .min(2, { message: "Username must be at least 2 characters long" })
-  .max(100, { message: "Username must be at most 100 characters long" })
+  .min(2, { message: "Username must be at least 2 characters." })
+  .max(20, { message: "Username must be at most 20 characters." })
   .regex(
     /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
-    "Username must consist of letters, digits and spaces. There must be at least one letter. Multiple consecutive spaces are not allowed.",
+    "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
   );
 const defaultUsernameError = "Invalid username";
 

@@ -8,10 +8,40 @@ test("when page is loaded, initially show start view", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Start Game" })).toBeVisible();
 });
 
+test("when invalid username is entered, show error message", async ({
+  page,
+}) => {
+  await page.goto("/");
+  for (const { input, message } of [
+    { input: "", message: "Username must be at least 2 characters." },
+    {
+      input: "a".repeat(21),
+      message: "Username must be at most 20 characters.",
+    },
+    {
+      input: "123",
+      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+    },
+    {
+      input: "a  b",
+      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+    },
+    {
+      input: "**",
+      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+    }
+  ]) {
+    await page.fill("input", input);
+    await page.getByRole("button", { name: "Start Game" }).click();
+    await expect(page.getByText(message)).toBeVisible();
+  }
+});
+
 test("when played through first level, show level results", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
   await expect(page.getByText("Level 1")).toBeVisible();
   for (const key of keysByLevel[0]) {
@@ -39,6 +69,7 @@ test("when played through first level with too many mistakes, show level failed 
   page,
 }) => {
   await page.goto("/");
+  await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
   await expect(page.getByText("Level 1")).toBeVisible();
   for (const key of level1FailKeys) {
@@ -64,6 +95,7 @@ test("when played through the game, show finished game view and calculate total 
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
+  await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
   let totalPoints = 0;
   for (let i = 0; i < keysByLevel.length; i++) {
@@ -92,6 +124,7 @@ test("when played through last level with too many mistakes, show level failed m
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
+  await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
   for (let i = 0; i < keysByLevel.length; i++) {
     const isLastLevel = i === keysByLevel.length - 1;

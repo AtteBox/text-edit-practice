@@ -26,7 +26,7 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
           Start Game
         </button>
       </div>
-      <div className="text-red-500 text-sm">{validationMessage}</div>
+      <div className="text-red-500 text-sm min-h-5">{validationMessage}</div>
     </div>
   );
 }
