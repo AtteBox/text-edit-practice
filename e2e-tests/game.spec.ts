@@ -20,16 +20,19 @@ test("when invalid username is entered, show error message", async ({
     },
     {
       input: "123",
-      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+      message:
+        "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
     },
     {
       input: "a  b",
-      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+      message:
+        "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
     },
     {
       input: "**",
-      message: "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
-    }
+      message:
+        "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+    },
   ]) {
     await page.fill("input", input);
     await page.getByRole("button", { name: "Start Game" }).click();
