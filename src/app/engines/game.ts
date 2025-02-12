@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { animalChars, germChars, ILevel } from "../levels";
+import { z } from "zod";
 
 /**
  * Internal state of the game engine for a single level
@@ -16,6 +17,7 @@ type ILevelState = {
  * Internal state of the game engine for the whole game
  */
 type IGameState = {
+  username?: string;
   currentLevel: number;
   previousLevels: (ILevelState & { level: number })[];
   gameHasStarted: boolean;
@@ -35,6 +37,19 @@ export type ILevelResult = {
 };
 
 /**
+ * Username validation schema
+ */
+const usernameSchema = z
+  .string()
+  .min(2, { message: "Username must be at least 2 characters." })
+  .max(20, { message: "Username must be at most 20 characters." })
+  .regex(
+    /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
+    "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
+  );
+const defaultUsernameError = "Invalid username";
+
+/**
  * External api of the game engine for the whole game
  */
 export type IGameEngineResult = {
@@ -46,7 +61,7 @@ export type IGameEngineResult = {
   levelFinished: boolean;
   isLastLevel: boolean;
   levelFailed: boolean;
-  startGame: () => void;
+  startGame: (username: string) => { error: string | undefined };
   updateLevelStats: ({ textContent }: { textContent: string }) => void;
   previousLevels: ILevelResult[];
 } & ILevelResult;
@@ -101,16 +116,28 @@ export function useGameEngine({
     }));
   }, []);
 
-  const startGame = useCallback(
-    () =>
-      setGameState((state) => ({
-        ...state,
-        gameHasStarted: true,
-        startTime: Date.now(),
-        elapsedTime: 0,
-      })),
-    [],
-  );
+  const startGame = useCallback((username: string) => {
+    const { error, data: validatedUsername } =
+      usernameSchema.safeParse(username);
+    if (error) {
+      return {
+        error:
+          error.issues.length > 0
+            ? error.issues[0].message
+            : defaultUsernameError,
+      };
+    }
+
+    setGameState((state) => ({
+      ...state,
+      gameHasStarted: true,
+      username: validatedUsername,
+      startTime: Date.now(),
+      elapsedTime: 0,
+    }));
+
+    return { error: undefined };
+  }, []);
 
   const restartGame = useCallback(() => {
     window.location.reload();
