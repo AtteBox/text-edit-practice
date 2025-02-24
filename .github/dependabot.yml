@@ -8,4 +8,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    ignore:
+      # For all deps
+      - dependency-name: "*"
+        # ignore all major updates
+        update-types: ["version-update:semver-major"]
