@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  InstanceIdentifier:
+    Description: Identifies this instance of the application
+    Type: String
+Resources:
+  HighScoreTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties: 
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 10
+        WriteCapacityUnits: 10
+      TableName: !Join [ "__", [ "Typoterminator-HighScore-Table", !Ref InstanceIdentifier] ]
+      AttributeDefinitions: 
+        - 
+          AttributeName: "entityType"
+          AttributeType: "S"
+        - 
+          AttributeName: "entityId"
+          AttributeType: "S"
+        - 
+          AttributeName: "gameHistoryHashsum"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "entityType"
+          KeyType: "HASH"
+        - 
+          AttributeName: "entityId"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "gameHistoryHashsumIndex"
+          KeySchema:
+          - 
+            AttributeName: "entityType"
+            KeyType: "HASH"
+          - 
+            AttributeName: "gameHistoryHashsum"
+            KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 10
+  TypoTerminatorUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: !Join [ "__", [ "Typoterminator-User", !Ref InstanceIdentifier] ]
+      Policies:
+        - PolicyName: "HighScoreTableAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:PutItem"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:Scan"
+                  - "dynamodb:Query"
+                Resource: 
+                  - !GetAtt HighScoreTable.Arn
+                  - !Sub "${HighScoreTable.Arn}/index/*"
