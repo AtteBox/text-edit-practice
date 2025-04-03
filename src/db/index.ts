@@ -5,7 +5,6 @@ import { string } from 'dynamodb-toolbox/schema/string'
 import { number } from 'dynamodb-toolbox/schema/number'
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { get } from "http";
 
 const dynamoDBClient = new DynamoDBClient();
 

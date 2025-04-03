@@ -1,5 +1,11 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { randomUUID } from "crypto";
+
+type HighScore = {
+  score: number;
+  username: string;
+  gameHistory: string;
+};
 
 test("get endpoint should successfully return highscores", async ({
   request,
@@ -11,19 +17,23 @@ test("get endpoint should successfully return highscores", async ({
 test("post endpoint should successfully save a highscore", async ({
   request,
 }) => {
+  const newHighScore: HighScore = {
+    score: 100,
+    username: "test" + randomUUID(),
+    gameHistory: "this is some game history " + randomUUID(),
+  };
   const result = await request.post("/api/highscores", {
-    data: {
-      score: 100,
-      username: "test",
-      gameHistory: "this is some game history " + randomUUID(),
-    },
+    data: newHighScore,
   });
   expect(result.ok()).toBeTruthy();
   const getResponse = await request.get("/api/highscores");
-    const body = await getResponse.json();
-    expect(body.items).toContainEqual(
-      expect.objectContaining({ score: 100, username: "test" }),
-    );
+  const body = await getResponse.json();
+  expect(body.items).toContainEqual(
+    expect.objectContaining({
+      score: newHighScore.score,
+      username: newHighScore.username,
+    }),
+  );
 });
 
 test("validation should fail for invalid input", async ({ request }) => {
@@ -41,7 +51,7 @@ test("validation should fail for invalid input", async ({ request }) => {
   );
 });
 
-test("preventing submitting the same game history twice", async ({
+test("validation should prevent submitting the same game history twice", async ({
   request,
 }) => {
   const gameHistory = "this is some new game history " + randomUUID();
@@ -56,4 +66,37 @@ test("preventing submitting the same game history twice", async ({
   expect(result2.ok()).toBeFalsy();
   const body = await result2.json();
   expect(body.message).toBe("This game history has already been submitted.");
+});
+
+test("order of highscores should be correct", async ({ request }) => {
+  const testScores = [
+    ["c", 3],
+    ["a", 1],
+    ["d", 4],
+    ["b", 2],
+  ];
+  for (const [username, score] of testScores) {
+    const result = await request.post("/api/highscores", {
+      data: {
+        score,
+        username,
+        gameHistory: "this is some game history " + randomUUID(),
+      },
+    });
+    expect(result.ok()).toBeTruthy();
+  }
+
+  const getResponse = await request.get("/api/highscores");
+  const body = await getResponse.json();
+  const highscores = Array.from(
+    new Set(
+      body.items
+        // currently the database might return other items, so we need to filter them out
+        .filter((item: HighScore) =>
+          testScores.map((a) => a[0]).includes(item.username),
+        )
+        .map((item: HighScore) => item.username),
+    ),
+  );
+  expect(highscores).toEqual(testScores.map((a) => a[0]).sort());
 });
