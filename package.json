@@ -23,16 +23,16 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.50.1",
-    "@types/node": "^20.17.22",
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^20.17.30",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.24",
+    "eslint-config-next": "14.2.26",
     "eslint-config-prettier": "^9.1.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.5.3",
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.2",
     "vitest": "^3.0.7"
