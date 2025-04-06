@@ -70,10 +70,10 @@ test("validation should prevent submitting the same game history twice", async (
 
 test("order of highscores should be correct", async ({ request }) => {
   const testScores = [
-    ["c", 3],
-    ["a", 1],
-    ["d", 4],
-    ["b", 2],
+    ["c user", 3],
+    ["a user", 1],
+    ["d user", 4],
+    ["b user", 2],
   ];
   for (const [username, score] of testScores) {
     const result = await request.post("/api/highscores", {
@@ -98,5 +98,5 @@ test("order of highscores should be correct", async ({ request }) => {
         .map((item: HighScore) => item.username),
     ),
   );
-  expect(highscores).toEqual(testScores.map((a) => a[0]).sort());
+  expect(highscores).toEqual(["d user", "c user", "b user", "a user"]);
 });
