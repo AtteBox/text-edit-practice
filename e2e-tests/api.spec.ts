@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { randomUUID } from "crypto";
+import { randomInt, randomUUID } from "crypto";
 
 type HighScore = {
   score: number;
@@ -19,7 +19,7 @@ test("post endpoint should successfully save a highscore", async ({
 }) => {
   const newHighScore: HighScore = {
     score: 100,
-    username: "test" + randomUUID(),
+    username: "test" + randomInt(281474976710655),
     gameHistory: "this is some game history " + randomUUID(),
   };
   const result = await request.post("/api/highscores", {
