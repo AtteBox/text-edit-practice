@@ -1,4 +1,4 @@
-import { ILevelResult } from "../engines/game";
+import { ILevelResult } from "../utilities/game";
 import { getDangerColor } from "../utils";
 
 function LevelResultsBar({ levelResults }: { levelResults: ILevelResult }) {

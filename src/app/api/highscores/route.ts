@@ -4,6 +4,7 @@ import { PutItemCommand, QueryCommand, ScanCommand } from "dynamodb-toolbox";
 import { randomUUID, createHash } from "crypto";
 import { HighScore, HighScoresTable } from "@/db";
 import { highScoreSchema } from "@/schema";
+import { validateKeyRecording } from "@/app/gameValidation";
 
 export async function POST(request: Request) {
   const receivedBody: unknown = await request.json();
@@ -24,12 +25,19 @@ export async function POST(request: Request) {
 
   const { score, username, gameHistory } = data;
 
-  const gameHistoryHashsum = calculateSHA256(gameHistory);
+  const gameHistoryHashsum = calculateSHA256(JSON.stringify(gameHistory));
 
   if (await gameHistoryExists(gameHistoryHashsum)) {
     return Response.json(
       { message: "This game history has already been submitted." },
       { status: 403 }
+    );
+  }
+
+  if (!validateKeyRecording(gameHistory)) {
+    return Response.json(
+      { message: "Invalid game history." },
+      { status: 400 }
     );
   }
 
