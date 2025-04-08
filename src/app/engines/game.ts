@@ -30,6 +30,8 @@ export type IGameEngineResult = {
   startGame: (username: string) => { error: string | undefined };
   updateLevelStats: ({ textContent }: { textContent: string }) => void;
   previousLevels: ILevelResult[];
+  username?: string;
+  isGameFinished: boolean;
 } & ILevelResult;
 
 export function useGameEngine({
@@ -193,6 +195,8 @@ export function useGameEngine({
     gameHasStarted: gameState.gameHasStarted,
     levelFinished: gameState.levelFinished,
     previousLevels,
+    username: gameState.username,
+    isGameFinished: gameState.gameHasStarted && isLastLevel && !levelFailed,
   };
 }
 

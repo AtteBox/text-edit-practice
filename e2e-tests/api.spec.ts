@@ -1,17 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { randomInt } from "crypto";
-import { keysByLevel } from "./keySequences";
+import { HighScore } from "./types";
+import { createRandomGameHistory, createRandomUsername } from "./helpers";
 
-type HighScore = {
-  score: number;
-  username: string;
-  gameHistory: IGameHistory;
-};
-
-type IGameHistory = {
-  level: number;
-  pressedKeys: { keyCombination: string[]; timestamp: number }[];
-}[];
+test.beforeEach(async ({ browserName }) => {
+  test.skip(browserName !== "chromium", "Only run API tests on Chromium");
+});
 
 test("get endpoint should successfully return highscores", async ({
   request,
@@ -106,32 +99,3 @@ test("order of highscores should be correct", async ({ request }) => {
   );
   expect(highscores).toEqual(["d user", "c user", "b user", "a user"]);
 });
-
-function createRandomUsername(): string {
-  const randomNumber = randomInt(281474976710655);
-  return "user" + randomNumber;
-}
-
-function createRandomGameHistory(): IGameHistory {
-  let previousKeyDownTimestamp = randomInt(281474976710655);
-  return keysByLevel.map((keys, index) => ({
-    level: index + 1,
-    pressedKeys: keys
-      .map(mapToVirtualTextareaKeyCombination)
-      .map((keyCombination) => ({
-        keyCombination,
-        timestamp: (previousKeyDownTimestamp += 100),
-      })),
-  }));
-}
-
-function mapToVirtualTextareaKeyCombination(keyCombination: string): string[] {
-  const keys = keyCombination.split("+");
-  if (keys.length === 1) {
-    return [keys[0]];
-  }
-  if (keys.length === 2) {
-    return [keys[0].replace("Control", "ctrl"), keys[1]];
-  }
-  return [];
-}

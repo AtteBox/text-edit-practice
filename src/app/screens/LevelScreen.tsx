@@ -3,12 +3,26 @@ import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
+import { IGameHistory } from "../engines/gameHistory";
+import { useEffect } from "react";
 
-function LevelScreen({ game }: { game: IGameEngineResult }) {
+function LevelScreen({
+  game,
+  gameHistory,
+}: {
+  game: IGameEngineResult;
+  gameHistory: IGameHistory;
+}) {
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
     game,
   });
   const level = game.currentLevel;
+  const saveKeyStroke = gameHistory.saveKeyStroke;
+  useEffect(() => {
+    if (currentKeyCombination) {
+      saveKeyStroke(game.currentLevelNumber, currentKeyCombination);
+    }
+  }, [currentKeyCombination, game.currentLevelNumber, saveKeyStroke]);
 
   return (
     <div
