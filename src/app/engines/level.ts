@@ -2,9 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 import { ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
-import { getActualInitialCursorPos, startContentToText } from "../utilities/level";
+import {
+  getActualInitialCursorPos,
+  startContentToText,
+} from "../utilities/level";
 
-export function useLevelEngine({ game }: { game: IGameEngineResult }) {
+export function useLevelEngine({
+  game,
+  onKeyStroke,
+}: {
+  game: IGameEngineResult;
+  onKeyStroke: (keyCombination: string[]) => void;
+}) {
   const level = game.currentLevel;
   const [gameMap, setGameMap] = useState<string>(
     startContentToText(level.startContent),
@@ -81,8 +90,12 @@ export function useLevelEngine({ game }: { game: IGameEngineResult }) {
   );
 
   const handleKeyUp = useCallback(() => {
+    if (!currentKeyCombination) {
+      return;
+    }
+    onKeyStroke(currentKeyCombination);
     setCurrentKeyCombination(null);
-  }, []);
+  }, [onKeyStroke, currentKeyCombination]);
 
   useEffect(() => {
     if (game.gameHasStarted && !game.levelFinished) {

@@ -4,7 +4,7 @@ import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
 import { IGameHistory } from "../engines/gameHistory";
-import { useEffect } from "react";
+import { useCallback } from "react";
 
 function LevelScreen({
   game,
@@ -13,17 +13,17 @@ function LevelScreen({
   game: IGameEngineResult;
   gameHistory: IGameHistory;
 }) {
+  const saveKeyStroke = gameHistory.saveKeyStroke;
+  const handleKeyStroke = useCallback(
+    (keyCombination: string[]) =>
+      saveKeyStroke(game.currentLevelNumber, keyCombination),
+    [game.currentLevelNumber, saveKeyStroke],
+  );
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
     game,
+    onKeyStroke: handleKeyStroke,
   });
   const level = game.currentLevel;
-  const saveKeyStroke = gameHistory.saveKeyStroke;
-  useEffect(() => {
-    if (currentKeyCombination) {
-      saveKeyStroke(game.currentLevelNumber, currentKeyCombination);
-    }
-  }, [currentKeyCombination, game.currentLevelNumber, saveKeyStroke]);
-
   return (
     <div
       className="flex flex-col gap-5 row-start-2 items-center sm:items-start"

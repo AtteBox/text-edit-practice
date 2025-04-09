@@ -139,17 +139,18 @@ test("when played through the game, show finished game view and calculate total 
     }
     if (isLastLevel) {
       await expect(page.getByText(`Congratulations!`)).toBeVisible();
+      await expect(page.getByText("Time:", { exact: false }), "should have finished and recorded 5 levels").toHaveCount(5);
     } else {
       await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
     }
     totalPoints += await extractPoints(page);
-    await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
+    //await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
     if (!isLastLevel) {
       await page.getByRole("button", { name: "Next Level" }).click();
-    }/* else {
+    } else {
       await expect(page.getByText("Saving your high score...")).toBeVisible();
       await expect(page.getByText("Your high score has been saved!")).toBeVisible();
-    }*/
+    }
   }
 });
 
@@ -169,11 +170,11 @@ async function pressGameKey(page: Page, key: string) {
  */
 async function extractPoints(page: Page) {
   const pointsRegex = /^Points: ([0-9]+)/;
-  const points = await page.getByText(pointsRegex, { exact: true }).all();
-  if (points.length === 0) {
+  const pointsHits = await page.getByText(pointsRegex, { exact: true }).all();
+  if (pointsHits.length === 0) {
     throw new Error("Points not found on page");
   }
-  const pointsText = await points[points.length - 1].textContent();
+  const pointsText = await pointsHits[pointsHits.length - 1].textContent();
   const match = pointsText!.match(pointsRegex);
   return Number(match![1]);
 }

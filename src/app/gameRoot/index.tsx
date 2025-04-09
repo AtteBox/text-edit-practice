@@ -62,8 +62,11 @@ function Screen({
   if (game.levelFailed) {
     return <FailedLevelScreen game={game} />;
   }
-  if (game.isLastLevel) {
+  if (game.isGameFinished) {
     return <EndScreen game={game} gameHistory={gameHistory} />;
   }
-  return <FinishedLevelScreen game={game} />;
+  if (game.levelFinished) {
+    return <FinishedLevelScreen game={game} />;
+  }
+  return <></>;
 }

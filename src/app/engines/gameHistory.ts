@@ -27,6 +27,11 @@ export function useGameHistory(): IGameHistory {
         });
       }
 
+      localStorage.setItem(
+        "keyRecording",
+        JSON.stringify(updatedHistory),
+      );
+
       return updatedHistory;
     });
   };

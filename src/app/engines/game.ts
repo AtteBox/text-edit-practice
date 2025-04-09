@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { calcPoints, calcTotalPoints, getAnimalCount, getGermCount, IGameState, ILevel, ILevelResult } from "../utilities/game";
+import {
+  calcPoints,
+  calcTotalPoints,
+  getAnimalCount,
+  getGermCount,
+  IGameState,
+  ILevel,
+  ILevelResult,
+} from "../utilities/game";
 
 /**
  * Username validation schema
@@ -160,6 +168,8 @@ export function useGameEngine({
     [gameState.previousLevels, levels],
   );
 
+  const isGameFinished = isLastLevel && gameState.levelFinished;
+
   // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
@@ -196,7 +206,6 @@ export function useGameEngine({
     levelFinished: gameState.levelFinished,
     previousLevels,
     username: gameState.username,
-    isGameFinished: gameState.gameHasStarted && isLastLevel && !levelFailed,
+    isGameFinished,
   };
 }
-

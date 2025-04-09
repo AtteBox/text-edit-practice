@@ -27,7 +27,7 @@ function EndScreen({
       saveHighScore();
     }
   }, [saveHighScore, game.isGameFinished]);
-  const allLevels = [...game.previousLevels];
+  const allLevels = [...game.previousLevels, game];
   return (
     <div className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md">
       <h1 className="text-2xl font-bold">Congratulations!</h1>
