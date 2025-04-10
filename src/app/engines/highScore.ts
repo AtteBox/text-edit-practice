@@ -8,16 +8,20 @@ type HighScore = z.infer<typeof highScoreSchema>;
 
 export function useHighscoreState(): IHighScoreState {
   const [highScore, setHighScore] = useState<HighScore>();
+  const [fetchHighScores, setFetchHighScores] = useState(false);
 
   const saveHighScoreMutation = useMutation({
     mutationFn: (highScore: HighScore) =>
       axios.post("/api/highscores", JSON.stringify(highScore)),
+    onSuccess: () => {
+      setFetchHighScores(true);
+    }
   });
 
   const queryTop100HighScores = useQuery({
     queryKey: ["highscoresTop100"],
     queryFn: () => axios.get("/api/highscores"),
-    enabled: saveHighScoreMutation.isSuccess,
+    enabled: fetchHighScores,
   });
 
   const playerIsInTop100 = useMemo(() => {
@@ -42,11 +46,23 @@ export function useHighscoreState(): IHighScoreState {
     [saveHighScoreMutation],
   );
 
+  const state = combineRequestStates(
+    saveHighScoreMutation.status,
+    queryTop100HighScores.status,
+  );
+
+  console.log(
+    "HighScore state",
+    state,
+    "saveHighScoreMutation",
+    saveHighScoreMutation.status,
+    "queryTop100HighScores",
+    queryTop100HighScores.status,
+    "playerIsInTop100",
+    playerIsInTop100,)
+
   return {
-    state: combineRequestStates(
-      saveHighScoreMutation.status,
-      queryTop100HighScores.status,
-    ),
+    state,
     playerIsInTop100,
     saveHighScore,
   };

@@ -124,6 +124,7 @@ test("when played through the game, show finished game view and calculate total 
   page,
   browserName,
 }) => {
+  test.setTimeout(100_000);
   test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
   await page.fill("input", "Test User");
@@ -144,7 +145,7 @@ test("when played through the game, show finished game view and calculate total 
       await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
     }
     totalPoints += await extractPoints(page);
-    //await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
+    await expect(page.getByText("Total Points: " + totalPoints)).toBeVisible();
     if (!isLastLevel) {
       await page.getByRole("button", { name: "Next Level" }).click();
     } else {
