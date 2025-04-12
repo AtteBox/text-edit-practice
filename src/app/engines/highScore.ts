@@ -8,35 +8,35 @@ type HighScore = z.infer<typeof highScoreSchema>;
 
 export function useHighscoreState(): IHighScoreState {
   const [highScore, setHighScore] = useState<HighScore>();
-  const [fetchHighScores, setFetchHighScores] = useState(false);
+  const [highScoreIsSaved, setHighScoreIsSaved] = useState(false);
 
   const saveHighScoreMutation = useMutation({
     mutationFn: (highScore: HighScore) =>
       axios.post("/api/highscores", JSON.stringify(highScore)),
     onSuccess: () => {
-      setFetchHighScores(true);
-    }
+      setHighScoreIsSaved(true);
+    },
   });
 
   const queryTop100HighScores = useQuery({
     queryKey: ["highscoresTop100"],
     queryFn: () => axios.get("/api/highscores"),
-    enabled: fetchHighScores,
+    enabled: highScoreIsSaved,
   });
 
   const playerIsInTop100 = useMemo(() => {
     if (
       !queryTop100HighScores.data ||
-      !saveHighScoreMutation.isSuccess ||
+      !highScoreIsSaved ||
       !highScore
     ) {
-      return false;
+      return undefined;
     }
     return playerIsInTop100HighScores(
       queryTop100HighScores.data.data.items,
       highScore,
     );
-  }, [queryTop100HighScores.data, saveHighScoreMutation.isSuccess, highScore]);
+  }, [queryTop100HighScores.data, highScoreIsSaved, highScore]);
 
   const saveHighScore = useCallback(
     (highScore: HighScore) => {
@@ -48,6 +48,7 @@ export function useHighscoreState(): IHighScoreState {
 
   const state = combineRequestStates(
     saveHighScoreMutation.status,
+    highScoreIsSaved,
     queryTop100HighScores.status,
   );
 
@@ -59,7 +60,8 @@ export function useHighscoreState(): IHighScoreState {
     "queryTop100HighScores",
     queryTop100HighScores.status,
     "playerIsInTop100",
-    playerIsInTop100,)
+    playerIsInTop100,
+  );
 
   return {
     state,
@@ -69,20 +71,14 @@ export function useHighscoreState(): IHighScoreState {
 }
 
 function combineRequestStates(
-  highScoresFetchState: RequestState,
-  highScoreSaveState: RequestState,
+  saveHighScoreMutationStatus: RequestState,
+  highScoreIsSaved: boolean,
+  queryTop100HighScoresStatus: RequestState,
 ): RequestState {
-  const requestStates = [highScoresFetchState, highScoreSaveState];
-  if (requestStates.includes("error")) {
-    return "error";
+  if (highScoreIsSaved) {
+    return queryTop100HighScoresStatus;
   }
-  if (requestStates.includes("pending")) {
-    return "pending";
-  }
-  if (requestStates.every((rs) => rs === "success")) {
-    return "success";
-  }
-  return "idle";
+  return saveHighScoreMutationStatus;
 }
 
 function playerIsInTop100HighScores(
@@ -99,7 +95,7 @@ function playerIsInTop100HighScores(
 type RequestState = "idle" | "pending" | "error" | "success";
 
 export type IHighScoreState = {
-  playerIsInTop100: boolean;
+  playerIsInTop100?: boolean;
   state: "idle" | "pending" | "error" | "success";
   saveHighScore: (highScore: HighScore) => void;
 };

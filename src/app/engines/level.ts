@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
