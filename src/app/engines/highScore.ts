@@ -52,17 +52,6 @@ export function useHighscoreState(): IHighScoreState {
     queryTop100HighScores.status,
   );
 
-  console.log(
-    "HighScore state",
-    state,
-    "saveHighScoreMutation",
-    saveHighScoreMutation.status,
-    "queryTop100HighScores",
-    queryTop100HighScores.status,
-    "playerIsInTop100",
-    playerIsInTop100,
-  );
-
   return {
     state,
     playerIsInTop100,
