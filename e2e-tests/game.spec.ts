@@ -120,11 +120,10 @@ test("when played through last level with too many mistakes, show level failed m
   }
 });
 
-test("when played through the game, show finished game view and calculate total points correctly also persist history to db", async ({
+test("when played through the game, show finished game view and calculate total points correctly. Also persist history to db", async ({
   page,
   browserName,
 }) => {
-  test.setTimeout(100_000);
   test.skip(browserName === "webkit", "TODO: Still working on it");
   await page.goto("/");
   await page.fill("input", "Test User");
