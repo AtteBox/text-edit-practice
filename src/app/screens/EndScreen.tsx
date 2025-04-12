@@ -12,7 +12,7 @@ function EndScreen({
   game: IGameEngineResult;
   gameHistory: IGameHistory;
 }) {
-  const hasTriedToSaveHighScore = useRef(false);
+  const hasStartedSavingHighScore = useRef(false);
   const highScores = useHighscoreState();
   const saveHighScore = useCallback(() => {
     highScores.saveHighScore({
@@ -22,8 +22,8 @@ function EndScreen({
     });
   }, [game.username, game.totalPoints, gameHistory.keyRecording, highScores]);
   useEffect(() => {
-    if (game.isGameFinished && !hasTriedToSaveHighScore.current) {
-      hasTriedToSaveHighScore.current = true;
+    if (game.isGameFinished && !hasStartedSavingHighScore.current) {
+      hasStartedSavingHighScore.current = true;
       saveHighScore();
     }
   }, [saveHighScore, game.isGameFinished]);
