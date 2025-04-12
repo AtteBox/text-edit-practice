@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import gihubLogo from "../assets/github-mark-white.svg";
 import { IGameEngineResult, useGameEngine } from "../engines/game";
 import { levels } from "../levels";
 import EndScreen from "../screens/EndScreen";
@@ -26,6 +28,18 @@ export function GameRoot() {
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
           <span className="text-xs">
             © Atte Virtanen {new Date().getFullYear()}
+            <a
+              href="https://github.com/AtteBox/text-edit-practice"
+              title="Open code in Github"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src={gihubLogo}
+                alt="Github logo"
+                className="w-4 h-4 ml-3 inline-block"
+              />
+            </a>
           </span>
         </footer>
       </div>
