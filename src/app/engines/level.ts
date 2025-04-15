@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
-import {
-  getActualInitialCursorPos,
-  startContentToText,
-} from "../utilities/level";
+import { getActualInitialCursorPos, startContentToText } from "../gameUtilities";
 
 export function useLevelEngine({
   game,

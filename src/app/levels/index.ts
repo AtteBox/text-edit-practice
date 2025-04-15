@@ -1,4 +1,4 @@
-import { ILevel } from "../utilities/game";
+import { ILevel } from "../gameUtilities";
 
 export const levels: ILevel[] = [
   {

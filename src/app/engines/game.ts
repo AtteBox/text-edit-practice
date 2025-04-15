@@ -8,7 +8,7 @@ import {
   IGameState,
   ILevel,
   ILevelResult,
-} from "../utilities/game";
+} from "../gameUtilities";
 
 /**
  * Username validation schema
