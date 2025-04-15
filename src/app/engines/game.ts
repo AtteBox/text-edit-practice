@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { z } from "zod";
 import {
   calcPoints,
   calcTotalPoints,
@@ -9,18 +8,8 @@ import {
   ILevel,
   ILevelResult,
 } from "../gameUtilities";
+import { usernameSchema } from "../../schema";
 
-/**
- * Username validation schema
- */
-const usernameSchema = z
-  .string()
-  .min(2, { message: "Username must be at least 2 characters." })
-  .max(20, { message: "Username must be at most 20 characters." })
-  .regex(
-    /^(?=.*[a-zA-Z])[a-zA-Z0-9](?!.*  )[a-zA-Z0-9 ]*$/,
-    "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
-  );
 const defaultUsernameError = "Invalid username";
 
 /**
