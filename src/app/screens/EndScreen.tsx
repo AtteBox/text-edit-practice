@@ -40,18 +40,21 @@ function EndScreen({
         ))}
       </ol>
       <GameResultsBar game={game} alignRight />
-      {highScores.state === "pending" && (
+      {highScores.isLoading && (
         <p className="text-sm">Saving your high score...</p>
       )}
-      {highScores.state === "error" && (
+      {highScores.failedSavingHighScore && (
         <p className="text-sm text-red-500">
-          Failed to save your high score. Please{" "}
+          Failed saving your high score. Please{" "}
           <button className="text-blue-500 underline" onClick={saveHighScore}>
             try again.
           </button>
         </p>
       )}
-      {highScores.state === "success" && (
+      {highScores.failedFetchingHighScore && (
+        <p className="text-sm text-red-500">Failed fetching high scores. You can see the top results on the high scores page.</p>
+      )}
+      {highScores.finishedSuccessfully && (
         <>
           <p className="text-sm text-green-500">
             Your high score has been saved!

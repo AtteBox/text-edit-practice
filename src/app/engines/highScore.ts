@@ -25,11 +25,7 @@ export function useHighscoreState(): IHighScoreState {
   });
 
   const playerIsInTop100 = useMemo(() => {
-    if (
-      !queryTop100HighScores.data ||
-      !highScoreIsSaved ||
-      !highScore
-    ) {
+    if (!queryTop100HighScores.data || !highScoreIsSaved || !highScore) {
       return undefined;
     }
     return playerIsInTop100HighScores(
@@ -46,28 +42,16 @@ export function useHighscoreState(): IHighScoreState {
     [saveHighScoreMutation],
   );
 
-  const state = combineRequestStates(
-    saveHighScoreMutation.status,
-    highScoreIsSaved,
-    queryTop100HighScores.status,
-  );
-
   return {
-    state,
-    playerIsInTop100,
     saveHighScore,
+    isLoading: highScoreIsSaved
+      ? queryTop100HighScores.isLoading
+      : saveHighScoreMutation.isPending,
+    failedSavingHighScore: saveHighScoreMutation.isError,
+    failedFetchingHighScore: queryTop100HighScores.isError,
+    playerIsInTop100,
+    finishedSuccessfully: playerIsInTop100 != null,
   };
-}
-
-function combineRequestStates(
-  saveHighScoreMutationStatus: RequestState,
-  highScoreIsSaved: boolean,
-  queryTop100HighScoresStatus: RequestState,
-): RequestState {
-  if (highScoreIsSaved) {
-    return queryTop100HighScoresStatus;
-  }
-  return saveHighScoreMutationStatus;
 }
 
 function playerIsInTop100HighScores(
@@ -81,10 +65,11 @@ function playerIsInTop100HighScores(
   );
 }
 
-type RequestState = "idle" | "pending" | "error" | "success";
-
 export type IHighScoreState = {
-  playerIsInTop100?: boolean;
-  state: "idle" | "pending" | "error" | "success";
   saveHighScore: (highScore: HighScore) => void;
+  isLoading: boolean;
+  failedSavingHighScore: boolean;
+  failedFetchingHighScore: boolean;
+  finishedSuccessfully: boolean;
+  playerIsInTop100?: boolean;
 };
