@@ -12,4 +12,6 @@ if ($DynamoDBCapacityUnits -lt 1) {
     exit 1
 }
 
-aws cloudformation deploy --stack-name "Typoterminator-Stack-$InstanceIdentifier" --template-file ./infra/infra.yaml --parameter-overrides="InstanceIdentifier=${$InstanceIdentifier}" --parameter-overrides="DynamoDBCapacityUnits=${DynamoDBCapacityUnits}" --capabilities CAPABILITY_NAMED_IAM 
+$Parameters = "[""DynamoDBCapacityUnits=$DynamoDBCapacityUnits"",""InstanceIdentifier=$InstanceIdentifier""]"
+
+aws cloudformation deploy --stack-name "Typoterminator-Stack-$InstanceIdentifier" --template-file ./infra/infra.yaml --parameter-overrides=$Parameters --capabilities CAPABILITY_NAMED_IAM 
