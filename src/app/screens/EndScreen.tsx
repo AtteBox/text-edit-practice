@@ -1,8 +1,32 @@
+import { useCallback, useEffect, useRef } from "react";
 import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { IGameEngineResult } from "../engines/game";
+import { IGameHistory } from "../engines/gameHistory";
+import { useHighscoreState } from "../engines/highScore";
 
-function EndScreen({ game }: { game: IGameEngineResult }) {
+function EndScreen({
+  game,
+  gameHistory,
+}: {
+  game: IGameEngineResult;
+  gameHistory: IGameHistory;
+}) {
+  const hasStartedSavingHighScore = useRef(false);
+  const highScores = useHighscoreState();
+  const saveHighScore = useCallback(() => {
+    highScores.saveHighScore({
+      username: game.username!,
+      score: game.totalPoints,
+      gameHistory: gameHistory.keyRecording,
+    });
+  }, [game.username, game.totalPoints, gameHistory.keyRecording, highScores]);
+  useEffect(() => {
+    if (game.isGameFinished && !hasStartedSavingHighScore.current) {
+      hasStartedSavingHighScore.current = true;
+      saveHighScore();
+    }
+  }, [saveHighScore, game.isGameFinished]);
   const allLevels = [...game.previousLevels, game];
   return (
     <div className="flex flex-col gap-5 row-start-2 items-center sm:items-start max-w-md">
@@ -16,6 +40,32 @@ function EndScreen({ game }: { game: IGameEngineResult }) {
         ))}
       </ol>
       <GameResultsBar game={game} alignRight />
+      {highScores.isLoading && (
+        <p className="text-sm">Saving your high score...</p>
+      )}
+      {highScores.failedSavingHighScore && (
+        <p className="text-sm text-red-500">
+          Failed saving your high score. Please{" "}
+          <button className="text-blue-500 underline" onClick={saveHighScore}>
+            try again.
+          </button>
+        </p>
+      )}
+      {highScores.failedFetchingHighScore && (
+        <p className="text-sm text-red-500">Failed fetching high scores. You can see the top results on the high scores page.</p>
+      )}
+      {highScores.finishedSuccessfully && (
+        <>
+          <p className="text-sm text-green-500">
+            Your high score has been saved!
+          </p>
+          {highScores.playerIsInTop100 && (
+            <p className="text-sm text-green-500">
+              You are in the top 100 high scores!
+            </p>
+          )}
+        </>
+      )}
       <div className="flex flex-col gap-4 items-end self-stretch">
         <button
           onClick={game.restartGame}
