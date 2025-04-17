@@ -3,13 +3,27 @@ import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
+import { IGameHistory } from "../engines/gameHistory";
+import { useCallback } from "react";
 
-function LevelScreen({ game }: { game: IGameEngineResult }) {
+function LevelScreen({
+  game,
+  gameHistory,
+}: {
+  game: IGameEngineResult;
+  gameHistory: IGameHistory;
+}) {
+  const saveKeyStroke = gameHistory.saveKeyStroke;
+  const handleKeyStroke = useCallback(
+    (keyCombination: string[]) =>
+      saveKeyStroke(game.currentLevelNumber, keyCombination),
+    [game.currentLevelNumber, saveKeyStroke],
+  );
   const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
     game,
+    onKeyStroke: handleKeyStroke,
   });
   const level = game.currentLevel;
-
   return (
     <div
       className="flex flex-col gap-5 row-start-2 items-center sm:items-start"

@@ -13,8 +13,13 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.772.0",
+    "@aws-sdk/lib-dynamodb": "^3.772.0",
+    "@tanstack/react-query": "^5.72.1",
     "@vitejs/plugin-react": "^4.3.4",
-    "next": "14.2.26",
+    "axios": "^1.8.4",
+    "dynamodb-toolbox": "^2.0.0",
+    "next": "^14.2.26",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^3.24.2"
