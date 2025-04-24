@@ -4,6 +4,7 @@ import LevelResultsBar from "../components/LevelResultsBar";
 import { IGameEngineResult } from "../engines/game";
 import { IGameHistory } from "../engines/gameHistory";
 import { useHighscoreState } from "../engines/highScore";
+import Link from "next/link";
 
 function EndScreen({
   game,
@@ -56,12 +57,13 @@ function EndScreen({
       )}
       {highScores.finishedSuccessfully && (
         <>
-          <p className="text-sm text-green-500">
-            Your high score has been saved!
-          </p>
-          {highScores.playerIsInTop100 && (
+          {highScores.playerIsInTop100 ? (
             <p className="text-sm text-green-500">
-              You are in the top 100 high scores!
+                Congrats! you reached the <Link href="/highscores" className="text-violet-400 hover:underline">top 100 highscores!</Link>
+            </p>
+          ) : (
+            <p className="text-sm text-yellow-500">
+              Unfortunately, you didn&apos;t reach the <Link href="/highscores" className="text-violet-400 hover:underline">top 100 highscores</Link>.
             </p>
           )}
         </>
