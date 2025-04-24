@@ -148,7 +148,8 @@ test("when played through the game, show finished game view and calculate total 
     if (!isLastLevel) {
       await page.getByRole("button", { name: "Next Level" }).click();
     } else {
-      await expect(page.getByText("Your high score has been saved!")).toBeVisible();
+      await page.getByRole("link", { name: "top 100 highscores", exact: false }).click();
+      await expect(page.getByText("top 100 highscores", { exact: false })).toBeVisible();
     }
   }
 });

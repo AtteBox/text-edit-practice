@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import gihubLogo from "../assets/github-mark-white.svg";
 import { IGameEngineResult, useGameEngine } from "../engines/game";
 import { levels } from "../levels";
@@ -17,33 +16,29 @@ export function GameRoot() {
   const game = useGameEngine({ levels });
   const gameHistory = useGameHistory();
 
-  const queryClient = new QueryClient();
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-        <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
-          <Screen game={game} gameHistory={gameHistory} />
-        </main>
-        <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-          <span className="text-xs">
-            © Atte Virtanen {new Date().getFullYear()}
-            <a
-              href="https://github.com/AtteBox/text-edit-practice"
-              title="Open code in Github"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src={gihubLogo}
-                alt="Github logo"
-                className="w-4 h-4 ml-3 inline-block"
-              />
-            </a>
-          </span>
-        </footer>
-      </div>
-    </QueryClientProvider>
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-5 row-start-2 items-center sm:items-start">
+        <Screen game={game} gameHistory={gameHistory} />
+      </main>
+      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
+        <span className="text-xs">
+          © Atte Virtanen {new Date().getFullYear()}
+          <a
+            href="https://github.com/AtteBox/text-edit-practice"
+            title="Open code in Github"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src={gihubLogo}
+              alt="Github logo"
+              className="w-4 h-4 ml-3 inline-block"
+            />
+          </a>
+        </span>
+      </footer>
+    </div>
   );
 }
 

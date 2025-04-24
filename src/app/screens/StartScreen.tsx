@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import startBanner from "../assets/start-banner.png";
 import { IGameEngineResult } from "../engines/game";
 import { useCallback, useState } from "react";
@@ -34,6 +35,9 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
           Start Game
         </button>
       </div>
+      <p className="text-sm text-gray-300">
+        The name is used for the <Link href="/highscores" className="text-violet-400 hover:underline">highscores</Link> list
+      </p>
       <div className="text-red-500 text-sm min-h-5">{validationMessage}</div>
     </div>
   );
