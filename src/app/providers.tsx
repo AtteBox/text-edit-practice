@@ -16,6 +16,7 @@ export default function Providers({ children }: ProvidersProps) {
         // With SSR, we usually want to set some default staleTime
         // above 0 to avoid refetching immediately on the client
         staleTime: 30 * 1000, // 30 seconds
+        retry: parseInt(process.env.NEXT_PUBLIC_REACT_QUERY_RETRIES ?? '3', 10),
       },
     },
   }));
