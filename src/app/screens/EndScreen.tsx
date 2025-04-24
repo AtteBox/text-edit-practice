@@ -56,12 +56,13 @@ function EndScreen({
       )}
       {highScores.finishedSuccessfully && (
         <>
-          <p className="text-sm text-green-500">
-            Your high score has been saved!
-          </p>
-          {highScores.playerIsInTop100 && (
+          {highScores.playerIsInTop100 ? (
             <p className="text-sm text-green-500">
-              You are in the top 100 high scores!
+                You reached the <a href="/highscores" className="hover:underline">top 100 highscores!</a>
+            </p>
+          ) : (
+            <p className="text-sm text-yellow-500">
+              You didn&apos;t reach the <a href="/highscores" className="hover:underline">top 100 highscores</a>.
             </p>
           )}
         </>
