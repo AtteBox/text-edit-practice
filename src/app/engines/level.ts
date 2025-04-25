@@ -92,7 +92,8 @@ export function useLevelEngine({
   }, []);
 
   useEffect(() => {
-    if (game.gameHasStarted && !game.levelFinished) {
+    // Only listen for keys if the game has started, is not finished, and is not paused
+    if (game.gameHasStarted && !game.levelFinished && !game.isPaused) {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
       return () => {
@@ -100,7 +101,42 @@ export function useLevelEngine({
         document.removeEventListener("keyup", handleKeyUp);
       };
     }
-  }, [game.gameHasStarted, game.levelFinished, handleKeyDown, handleKeyUp]);
+  }, [
+    game.gameHasStarted,
+    game.levelFinished,
+    game.isPaused,
+    handleKeyDown,
+    handleKeyUp,
+  ]);
+
+  const pauseGame = game.pauseGame
+
+  // Handle tab/window focus changes
+  useEffect(() => {
+    if (game.gameHasStarted && !game.levelFinished) {
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          pauseGame();
+        }
+      };
+
+      const handleBlur = () => {
+        pauseGame();
+      };
+
+
+      // Listen for visibility change events (tab switching)
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      
+      // Listen for window focus/blur events
+      window.addEventListener("blur", handleBlur);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("blur", handleBlur);
+      };  
+    }
+  }, [game.gameHasStarted, game.levelFinished, pauseGame]);
 
   return { gameMap, currentKeyCombination, cursorPos };
 }
