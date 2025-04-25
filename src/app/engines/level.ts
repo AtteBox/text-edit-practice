@@ -92,7 +92,8 @@ export function useLevelEngine({
   }, []);
 
   useEffect(() => {
-    if (game.gameHasStarted && !game.levelFinished) {
+    // Only listen for keys if the game has started, is not finished, and is not paused
+    if (game.gameHasStarted && !game.levelFinished && !game.isPaused) {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
       return () => {
@@ -100,7 +101,13 @@ export function useLevelEngine({
         document.removeEventListener("keyup", handleKeyUp);
       };
     }
-  }, [game.gameHasStarted, game.levelFinished, handleKeyDown, handleKeyUp]);
+  }, [
+    game.gameHasStarted,
+    game.levelFinished,
+    game.isPaused,
+    handleKeyDown,
+    handleKeyUp,
+  ]);
 
   return { gameMap, currentKeyCombination, cursorPos };
 }

@@ -25,28 +25,55 @@ function LevelScreen({
   });
   const level = game.currentLevel;
   return (
-    <div
-      className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
-      style={{
-        opacity: game.levelFinished ? 0 : 1,
-        transition: "opacity 1s ease",
-      }}
-    >
-      <h1 className="text-2xl font-bold">{level.title}</h1>
-      <p className="text-sm">{level.description}</p>
-      <GameResultsBar game={game} alignRight={false} />
-      <LevelResultsBar levelResults={game} />
-      <GameMap gameMap={gameMap} cursorPos={cursorPos} />
-      <div>
-        <span className="text-sm">Allowed key combinations:</span>
-        <div className="flex flex-wrap grow-0 gap-1">
-          {level.allowedKeyCombinations.map((keyCombination) => (
-            <KeyCombinationTag
-              key={keyCombination.join("-")}
-              keyCombination={keyCombination}
-              isPressed={currentKeyCombination === keyCombination}
-            />
-          ))}
+    <div className="relative w-full">
+      {/* Pause Overlay */}
+      {game.isPaused && (
+        <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center z-10">
+          <h2 className="text-3xl font-bold mb-4 text-white">Game Paused</h2>
+          <button
+            onClick={game.resumeGame}
+            className="p-3 rounded-md bg-green-600 hover:bg-green-700 active:bg-green-800 text-white focus:outline-none focus:ring focus:ring-green-300"
+          >
+            Resume Game
+          </button>
+        </div>
+      )}
+
+      {/* Main Level Content */}
+      <div
+        className="flex flex-col gap-5 row-start-2 items-center sm:items-start"
+        style={{
+          opacity: game.levelFinished ? 0 : 1,
+          transition: "opacity 1s ease",
+          filter: game.isPaused ? "blur(2px)" : "none",
+        }}
+      >
+        <div className="flex justify-between w-full items-center">
+          <h1 className="text-2xl font-bold">{level.title}</h1>
+          <button
+            onClick={game.pauseGame}
+            disabled={game.isPaused}
+            title="Pause Game"
+            className="p-2 rounded-md bg-red-500 hover:bg-red-600 active:bg-red-700 text-black focus:outline-none focus:ring focus:ring-red-300 disabled:opacity-50"
+          >
+            Pause
+          </button>
+        </div>
+        <p className="text-sm">{level.description}</p>
+        <GameResultsBar game={game} alignRight={false} />
+        <LevelResultsBar levelResults={game} />
+        <GameMap gameMap={gameMap} cursorPos={cursorPos} />
+        <div>
+          <span className="text-sm">Allowed key combinations:</span>
+          <div className="flex flex-wrap grow-0 gap-1">
+            {level.allowedKeyCombinations.map((keyCombination) => (
+              <KeyCombinationTag
+                key={keyCombination.join("-")}
+                keyCombination={keyCombination}
+                isPressed={currentKeyCombination === keyCombination}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

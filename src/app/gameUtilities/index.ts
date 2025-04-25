@@ -8,6 +8,8 @@ export type IGameState = {
   currentLevel: number;
   previousLevels: (ILevelState & { level: number })[];
   gameHasStarted: boolean;
+  isPaused: boolean;
+  gamePauses: { startTime: number; endTime?: number }[];
 } & ILevelState;
 
 /**
@@ -91,12 +93,15 @@ type ILevelState = {
   startTime: number;
   elapsedTime: number;
   levelFinished: boolean;
+  isPaused: boolean;
+  gamePauses: { startTime: number; endTime?: number }[];
 };
 
 export function calcPoints(gameState: ILevelState, level: ILevel) {
   const content = level.startContent.join("");
   const germRatio = 1 - (gameState.germs ?? 0) / getGermCount(content);
   const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
+
   const timeRatio = -Math.max(
     gameState.elapsedTime / 1000 / level.targetTimeSeconds,
     0,

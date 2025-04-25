@@ -29,6 +29,9 @@ export type IGameEngineResult = {
   previousLevels: ILevelResult[];
   username?: string;
   isGameFinished: boolean;
+  isPaused: boolean;
+  pauseGame: () => void;
+  resumeGame: () => void;
 } & ILevelResult;
 
 export function useGameEngine({
@@ -43,6 +46,8 @@ export function useGameEngine({
     previousLevels: [],
     gameHasStarted: false,
     levelFinished: false,
+    isPaused: false,
+    gamePauses: [],
   });
   const level = levels[gameState.currentLevel - 1];
 
@@ -50,13 +55,26 @@ export function useGameEngine({
   const levelFailed =
     !!gameState.levelFinished && calcPoints(gameState, level) <= 1;
 
-  const updateGameState = useCallback((overrides: Partial<IGameState> = {}) => {
-    setGameState((state) => ({
-      ...state,
-      elapsedTime: new Date().getTime() - state.startTime,
-      ...overrides,
-    }));
-  }, []);
+  const totalPauseDuration = useMemo(
+    () =>
+      gameState.gamePauses.reduce(
+        (acc, pause) => acc + ((pause.endTime ?? Date.now()) - pause.startTime),
+        0,
+      ),
+    [gameState.gamePauses],
+  );
+
+  const updateGameState = useCallback(
+    (overrides: Partial<IGameState> = {}) => {
+      setGameState((state) => ({
+        ...state,
+        elapsedTime:
+          new Date().getTime() - state.startTime - totalPauseDuration,
+        ...overrides,
+      }));
+    },
+    [totalPauseDuration],
+  );
 
   const startNextLevel = useCallback(() => {
     setGameState((state) => ({
@@ -67,6 +85,8 @@ export function useGameEngine({
       startTime: Date.now(),
       elapsedTime: 0,
       currentLevel: state.currentLevel + 1,
+      isPaused: state.isPaused,
+      gamePauses: [],
       previousLevels: [
         ...state.previousLevels,
         {
@@ -76,6 +96,8 @@ export function useGameEngine({
           startTime: state.startTime,
           elapsedTime: state.elapsedTime,
           levelFinished: true,
+          isPaused: false,
+          gamePauses: state.gamePauses,
         },
       ],
     }));
@@ -106,6 +128,42 @@ export function useGameEngine({
 
   const restartGame = useCallback(() => {
     window.location.reload();
+  }, []);
+
+  const pauseGame = useCallback(() => {
+    setGameState((state) => {
+      if (!state.isPaused) {
+        return {
+          ...state,
+          isPaused: true,
+          gamePauses: [...state.gamePauses, { startTime: Date.now() }],
+        };
+      }
+      return state;
+    });
+  }, []);
+
+  const resumeGame = useCallback(() => {
+    setGameState((state) => {
+      if (state.isPaused) {
+        const lastPauseIndex = state.gamePauses.length - 1;
+        const updatedPauses = [...state.gamePauses];
+        if (lastPauseIndex >= 0 && !updatedPauses[lastPauseIndex].endTime) {
+          updatedPauses[lastPauseIndex] = {
+            ...updatedPauses[lastPauseIndex],
+            endTime: Date.now(),
+          };
+        }
+
+        return {
+          ...state,
+          isPaused: false,
+          gamePauses: updatedPauses,
+          startTime: state.startTime,
+        };
+      }
+      return state;
+    });
   }, []);
 
   const updateLevelStats = useCallback(
@@ -159,7 +217,6 @@ export function useGameEngine({
 
   const isGameFinished = isLastLevel && gameState.levelFinished;
 
-  // when there are no germs left, show the level finished animation
   useEffect(() => {
     if (gameState.germs === 0) {
       updateGameState({ levelFinished: true });
@@ -167,13 +224,22 @@ export function useGameEngine({
   }, [gameState.germs, updateGameState]);
 
   useEffect(() => {
-    if (gameState.gameHasStarted && !gameState.levelFinished) {
+    if (
+      gameState.gameHasStarted &&
+      !gameState.levelFinished &&
+      !gameState.isPaused
+    ) {
       const interval = setInterval(() => {
         updateGameState();
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [updateGameState, gameState.levelFinished, gameState.gameHasStarted]);
+  }, [
+    updateGameState,
+    gameState.levelFinished,
+    gameState.gameHasStarted,
+    gameState.isPaused,
+  ]);
 
   return {
     isLastLevel,
@@ -196,5 +262,8 @@ export function useGameEngine({
     previousLevels,
     username: gameState.username,
     isGameFinished,
+    isPaused: gameState.isPaused,
+    pauseGame,
+    resumeGame,
   };
 }
