@@ -109,5 +109,34 @@ export function useLevelEngine({
     handleKeyUp,
   ]);
 
+  const pauseGame = game.pauseGame
+
+  // Handle tab/window focus changes
+  useEffect(() => {
+    if (game.gameHasStarted && !game.levelFinished) {
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          pauseGame();
+        }
+      };
+
+      const handleBlur = () => {
+        pauseGame();
+      };
+
+
+      // Listen for visibility change events (tab switching)
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      
+      // Listen for window focus/blur events
+      window.addEventListener("blur", handleBlur);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("blur", handleBlur);
+      };  
+    }
+  }, [game.gameHasStarted, game.levelFinished, pauseGame]);
+
   return { gameMap, currentKeyCombination, cursorPos };
 }

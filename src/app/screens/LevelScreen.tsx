@@ -24,6 +24,7 @@ function LevelScreen({
     onKeyStroke: handleKeyStroke,
   });
   const level = game.currentLevel;
+
   return (
     <div className="relative w-full">
       {/* Pause Overlay */}
@@ -62,7 +63,11 @@ function LevelScreen({
         <p className="text-sm">{level.description}</p>
         <GameResultsBar game={game} alignRight={false} />
         <LevelResultsBar levelResults={game} />
-        <GameMap gameMap={gameMap} cursorPos={cursorPos} />
+        <GameMap
+          gameMap={gameMap}
+          cursorPos={cursorPos}
+          isPaused={game.isPaused}
+        />
         <div>
           <span className="text-sm">Allowed key combinations:</span>
           <div className="flex flex-wrap grow-0 gap-1">
@@ -152,9 +157,11 @@ function KeyCombinationTag({
 function GameMap({
   gameMap,
   cursorPos,
+  isPaused,
 }: {
   gameMap: string;
   cursorPos: number;
+  isPaused: boolean;
 }) {
   const characters = Array.from(gameMap);
 
@@ -165,6 +172,8 @@ function GameMap({
           50%, 100% { opacity: 0; }
         }
       `;
+
+  const cursorAnimation = isPaused ? undefined : "blink 0.7s linear infinite";
 
   return (
     <pre
@@ -181,7 +190,7 @@ function GameMap({
           {index === cursorPos && (
             <span
               className="absolute inset-0 h-full w-0.5 bg-white"
-              style={{ animation: "blink 0.7s linear infinite" }}
+              style={{ animation: cursorAnimation }}
             />
           )}
           {char}
@@ -191,7 +200,7 @@ function GameMap({
         <span className="relative">
           <span
             className="absolute left-0 top-0 h-full w-0.5 bg-white"
-            style={{ animation: "blink 0.7s linear infinite" }}
+            style={{ animation: cursorAnimation }}
           />
         </span>
       )}
