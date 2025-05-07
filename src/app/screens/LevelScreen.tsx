@@ -181,6 +181,7 @@ function GameMap({
         minWidth: "450px",
         minHeight: "100px",
         backgroundImage: "radial-gradient(#6689A0, #364970)",
+        fontFamily: "var(--font-noto-emoji), monospace"
       }}
       className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
     >
