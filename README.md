@@ -2,7 +2,7 @@
 
 "Typo Terminator" is a web-based game for practicing basic text editing using a keyboard.
 
-The main-branch is being automatically deployed here: https://main.d2rz08zw1ht14m.amplifyapp.com/
+The main-branch is being automatically deployed here: https://text-edit-practice.vercel.app/
 
 ## Idea / Background
 
@@ -73,4 +73,4 @@ npm run test
 
 ## Deployment
 
-The game is deployed using [AWS Amplify](https://docs.aws.amazon.com/amplify/latest/userguide/welcome.html) (which has support for [NextJS in some degree](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-amplify-support.html)). The deployment is triggered by pushing to the main-branch.
+The game is deployed using Vercel. Deployment is triggered by pushing to the main branch. Pull requests also have preview versions deployed automatically.
