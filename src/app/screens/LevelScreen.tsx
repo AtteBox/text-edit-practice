@@ -135,7 +135,7 @@ function KeyCombinationTag({
         style={{
           backgroundImage: isPressed
             ? "radial-gradient(#00AA00, #006600)"
-            : "radial-gradient(#6689A0, #607495)",
+            : "radial-gradient(#AFD5E8, #8BADC5)",
           transition: isPressed ? "none" : "background-color 1s ease",
         }}
       >
@@ -178,10 +178,11 @@ function GameMap({
   return (
     <pre
       style={{
-        minWidth: "450px",
-        minHeight: "100px",
-        backgroundImage: "radial-gradient(#6689A0, #364970)",
-        fontFamily: "var(--font-noto-emoji), monospace"
+        minWidth: "544px",
+        minHeight: "120px",
+        backgroundImage: "radial-gradient(#AFD5E8, #8BADC5)",
+        fontFamily: "var(--font-noto-emoji), monospace",
+        fontSize: "1.2rem"
       }}
       className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
     >
