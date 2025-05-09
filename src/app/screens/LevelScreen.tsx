@@ -133,10 +133,10 @@ function KeyCombinationTag({
       <span
         className="inline-block p-2 rounded-lg text-black m-1"
         style={{
-          backgroundImage: isPressed
-            ? "radial-gradient(#00AA00, #006600)"
-            : "radial-gradient(#8BADC5, #6A8FAF)",
-          transition: isPressed ? "none" : "background-color 1s ease",
+          backgroundColor: isPressed
+            ? "#00AA00"
+            : "#8BADC5",
+          transition: isPressed ? "none" : "background-color 0.7s ease",
         }}
       >
         {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
