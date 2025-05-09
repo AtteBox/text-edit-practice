@@ -16,6 +16,7 @@ function EndScreen({
   const hasStartedSavingHighScore = useRef(false);
   const highScores = useHighscoreState();
   const saveHighScore = useCallback(() => {
+    localStorage.setItem("keyRecording", JSON.stringify(gameHistory.keyRecording));
     highScores.saveHighScore({
       username: game.username!,
       score: game.totalPoints,
