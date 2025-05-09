@@ -17,7 +17,7 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
     <div className="flex flex-col gap-5 row-start-2 items-center max-w-md">
       <h1 className="text-2xl font-bold">Welcome to Typo Terminator!</h1>
       <p className="text-sm">
-        A game where you eliminate unwanted characters swiftly!
+        A game where you swiftly eliminate unwanted characters!
       </p>
       <Image src={startBanner} alt="Typo Terminator Banner" />
       <div className="flex gap-4 mt-4 flex-row items-stretch h-13">

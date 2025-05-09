@@ -53,7 +53,7 @@ export function useGameEngine({
 
   const isLastLevel = gameState.currentLevel === levels.length;
   const levelFailed =
-    !!gameState.levelFinished && calcPoints(gameState, level) <= 1;
+    !!gameState.levelFinished && calcPoints(gameState, level) <= 0;
 
   const totalPauseDuration = useMemo(
     () =>

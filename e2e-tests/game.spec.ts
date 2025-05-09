@@ -53,7 +53,7 @@ test("when played through first level, show level results", async ({
   }
   await expect(page.getByText("Level 1 Completed")).toBeVisible();
   await expect(page.getByRole("button", { name: "Next Level" })).toBeVisible();
-  for (const text of ["Germs: 0/69", "Animals: 44/44", "Difficulty: 100"]) {
+  for (const text of ["Germs: 0/67", "Animals: 50/50", "Difficulty: 100"]) {
     await expect(page.getByText(text, { exact: true })).toBeVisible();
   }
   // points nor time should not change after level completion
@@ -83,7 +83,7 @@ test("when played through first level with too many mistakes, show level failed 
   await expect(
     page.getByRole("button", { name: "Restart Game" }),
   ).toBeVisible();
-  for (const text of ["Germs: 0/69", "Animals: 2/44", "Difficulty: 100"]) {
+  for (const text of ["Germs: 0/67", "Animals: 1/50", "Difficulty: 100"]) {
     await expect(page.getByText(text, { exact: true })).toBeVisible();
   }
   await expect(extractPoints(page)).resolves.toBe(0);
