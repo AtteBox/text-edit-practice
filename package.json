@@ -15,7 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.788.0",
     "@aws-sdk/lib-dynamodb": "^3.804.0",
-    "@tanstack/react-query": "^5.79.0",
+    "@tanstack/react-query": "^5.81.5",
     "@vitejs/plugin-react": "^4.5.0",
     "axios": "^1.9.0",
     "dynamodb-toolbox": "^2.5.0",
