@@ -2,7 +2,7 @@
 
 "Typo Terminator" is a web-based game for practicing basic text editing using a keyboard.
 
-The main-branch is being automatically deployed here: https://text-edit-practice.vercel.app/
+The main-branch is being automatically deployed here: https://typoterminator.onrender.com
 
 ## Idea / Background
 
@@ -73,4 +73,4 @@ npm run test
 
 ## Deployment
 
-The game is deployed using Vercel. Deployment is triggered by pushing to the main branch. Pull requests also have preview versions deployed automatically.
+The game is deployed using [Render](https://render.com). Deployment is triggered by pushing to the main branch.
