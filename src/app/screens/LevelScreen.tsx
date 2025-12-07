@@ -133,9 +133,7 @@ function KeyCombinationTag({
       <span
         className="inline-block p-2 rounded-lg text-black m-1"
         style={{
-          backgroundColor: isPressed
-            ? "#00AA00"
-            : "#8BADC5",
+          backgroundColor: isPressed ? "#00AA00" : "#8BADC5",
           transition: isPressed ? "none" : "background-color 0.7s ease",
         }}
       >
@@ -182,7 +180,7 @@ function GameMap({
         minHeight: "120px",
         backgroundImage: "radial-gradient(#8BADC5, #6A8FAF)",
         fontFamily: "var(--font-noto-emoji), monospace",
-        fontSize: "1.2rem"
+        fontSize: "1.2rem",
       }}
       className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
     >

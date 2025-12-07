@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { ctrlEquivalentPressed } from "../utils";
 import { calcTextarea } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
-import { getActualInitialCursorPos, startContentToText } from "../gameUtilities";
+import {
+  getActualInitialCursorPos,
+  startContentToText,
+} from "../gameUtilities";
 
 export function useLevelEngine({
   game,
@@ -22,11 +25,13 @@ export function useLevelEngine({
 
   //when level changes, reset the game map
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGameMap(startContentToText(level.startContent));
   }, [level.startContent, setGameMap]);
 
   // when level changes, reset the cursor position
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCursorPos(
       getActualInitialCursorPos(level.cursorStartPos, level.startContent),
     );
@@ -109,7 +114,7 @@ export function useLevelEngine({
     handleKeyUp,
   ]);
 
-  const pauseGame = game.pauseGame
+  const pauseGame = game.pauseGame;
 
   // Handle tab/window focus changes
   useEffect(() => {
@@ -124,17 +129,19 @@ export function useLevelEngine({
         pauseGame();
       };
 
-
       // Listen for visibility change events (tab switching)
       document.addEventListener("visibilitychange", handleVisibilityChange);
-      
+
       // Listen for window focus/blur events
       window.addEventListener("blur", handleBlur);
 
       return () => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
         window.removeEventListener("blur", handleBlur);
-      };  
+      };
     }
   }, [game.gameHasStarted, game.levelFinished, pauseGame]);
 

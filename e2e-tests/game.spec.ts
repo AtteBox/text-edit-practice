@@ -139,7 +139,10 @@ test("when played through the game, show finished game view and calculate total 
     }
     if (isLastLevel) {
       await expect(page.getByText(`Congratulations!`)).toBeVisible();
-      await expect(page.getByText("Time:", { exact: false }), "should have finished and recorded 5 levels").toHaveCount(5);
+      await expect(
+        page.getByText("Time:", { exact: false }),
+        "should have finished and recorded 5 levels",
+      ).toHaveCount(5);
     } else {
       await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
     }
@@ -148,8 +151,12 @@ test("when played through the game, show finished game view and calculate total 
     if (!isLastLevel) {
       await page.getByRole("button", { name: "Next Level" }).click();
     } else {
-      await page.getByRole("link", { name: "top 100 highscores", exact: false }).click();
-      await expect(page.getByText("top 100 highscores", { exact: false })).toBeVisible();
+      await page
+        .getByRole("link", { name: "top 100 highscores", exact: false })
+        .click();
+      await expect(
+        page.getByText("top 100 highscores", { exact: false }),
+      ).toBeVisible();
     }
   }
 });
@@ -161,28 +168,28 @@ test("when playing a level, user can pause and resume the game", async ({
   await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
   await expect(page.getByText("Level 1")).toBeVisible();
-  
+
   // Play a few keys to start the game
   const initialKeys = keysByLevel[0].slice(0, 5);
   for (const key of initialKeys) {
     await pressGameKey(page, key);
   }
-  
+
   // Record points and time before pausing
   const pointsBeforePause = await extractPoints(page);
   const timeBeforePause = await extractTime(page);
-  
+
   // Pause the game
   await page.getByRole("button", { name: "Pause" }).click();
   await expect(page.getByText("Game Paused")).toBeVisible();
-  
+
   // Wait a moment to ensure time would have advanced if not paused
   await page.waitForTimeout(1000);
-  
+
   // Verify points and time are frozen while paused
   await expect(extractPoints(page)).resolves.toBe(pointsBeforePause);
   await expect(extractTime(page)).resolves.toBe(timeBeforePause);
-  
+
   // Resume the game
   await page.getByRole("button", { name: "Resume Game" }).click();
   await expect(page.getByText("Game Paused")).not.toBeVisible();
@@ -193,20 +200,19 @@ test("when playing a level, user can pause and resume the game", async ({
   // time should be higher than before pause
   const finalTime = await extractTime(page);
   expect(finalTime).toBeGreaterThan(timeBeforePause);
-  
+
   // Continue playing
   const remainingKeys = keysByLevel[0].slice(5);
   for (const key of remainingKeys) {
     await pressGameKey(page, key);
   }
-  
+
   // Verify level completed
   await expect(page.getByText("Level 1 Completed")).toBeVisible();
-  
+
   // Final points should be higher than before pause
   const finalPoints = await extractPoints(page);
   expect(finalPoints).toBeGreaterThan(pointsBeforePause);
-
 });
 
 /**
