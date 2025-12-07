@@ -2,7 +2,7 @@
 
 "Typo Terminator" is a web-based game for practicing basic text editing using a keyboard.
 
-The main-branch is being automatically deployed here: https://typoterminator.onrender.com
+The main-branch is automatically being deployed here: https://typoterminator.netlify.app
 
 ## Idea / Background
 
@@ -73,4 +73,4 @@ npm run test
 
 ## Deployment
 
-The game is deployed using [Render](https://render.com). Deployment is triggered by pushing to the main branch.
+The game is deployed using [Netlify](https://netlify.com). Production deployment is triggered by pushing to the main branch. Pull requests have preview deployments.
