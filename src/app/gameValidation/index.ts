@@ -1,5 +1,9 @@
 import { levels } from "../levels";
-import { getActualInitialCursorPos, getGermCount, startContentToText } from "../gameUtilities";
+import {
+  getActualInitialCursorPos,
+  getGermCount,
+  startContentToText,
+} from "../gameUtilities";
 import { calcTextarea } from "../virtualTextarea";
 
 export type IKeyRecording = {

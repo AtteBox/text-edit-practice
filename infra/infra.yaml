@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   InstanceIdentifier:
     Description: Identifies this instance of the application
@@ -11,37 +11,34 @@ Parameters:
 Resources:
   HighScoreTable:
     Type: "AWS::DynamoDB::Table"
-    Properties: 
-      ProvisionedThroughput: 
+    Properties:
+      ProvisionedThroughput:
         ReadCapacityUnits: !Ref DynamoDBCapacityUnits
         WriteCapacityUnits: !Ref DynamoDBCapacityUnits
-      TableName: !Join [ "__", [ "Typoterminator-HighScore-Table", !Ref InstanceIdentifier] ]
-      AttributeDefinitions: 
-        - 
-          AttributeName: "entityType"
+      TableName:
+        !Join [
+          "__",
+          ["Typoterminator-HighScore-Table", !Ref InstanceIdentifier],
+        ]
+      AttributeDefinitions:
+        - AttributeName: "entityType"
           AttributeType: "S"
-        - 
-          AttributeName: "entityId"
+        - AttributeName: "entityId"
           AttributeType: "S"
-        - 
-          AttributeName: "gameHistoryHashsum"
+        - AttributeName: "gameHistoryHashsum"
           AttributeType: "S"
-      KeySchema: 
-        - 
-          AttributeName: "entityType"
+      KeySchema:
+        - AttributeName: "entityType"
           KeyType: "HASH"
-        - 
-          AttributeName: "entityId"
+        - AttributeName: "entityId"
           KeyType: "RANGE"
       GlobalSecondaryIndexes:
         - IndexName: "gameHistoryHashsumIndex"
           KeySchema:
-          - 
-            AttributeName: "entityType"
-            KeyType: "HASH"
-          - 
-            AttributeName: "gameHistoryHashsum"
-            KeyType: "RANGE"
+            - AttributeName: "entityType"
+              KeyType: "HASH"
+            - AttributeName: "gameHistoryHashsum"
+              KeyType: "RANGE"
           Projection:
             ProjectionType: "ALL"
           ProvisionedThroughput:
@@ -50,7 +47,7 @@ Resources:
   TypoTerminatorUser:
     Type: "AWS::IAM::User"
     Properties:
-      UserName: !Join [ "__", [ "Typoterminator-User", !Ref InstanceIdentifier] ]
+      UserName: !Join ["__", ["Typoterminator-User", !Ref InstanceIdentifier]]
       Policies:
         - PolicyName: "HighScoreTableAccessPolicy"
           PolicyDocument:
@@ -62,6 +59,6 @@ Resources:
                   - "dynamodb:GetItem"
                   - "dynamodb:Scan"
                   - "dynamodb:Query"
-                Resource: 
+                Resource:
                   - !GetAtt HighScoreTable.Arn
                   - !Sub "${HighScoreTable.Arn}/index/*"

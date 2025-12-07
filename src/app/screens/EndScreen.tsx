@@ -53,17 +53,33 @@ function EndScreen({
         </p>
       )}
       {highScores.failedFetchingHighScore && (
-        <p className="text-sm text-red-500">Failed fetching high scores. You can see the top results on the high scores page.</p>
+        <p className="text-sm text-red-500">
+          Failed fetching high scores. You can see the top results on the high
+          scores page.
+        </p>
       )}
       {highScores.finishedSuccessfully && (
         <>
           {highScores.playerIsInTop100 ? (
             <p className="text-sm text-green-500">
-                Congrats! you reached the <Link href="/highscores" className="text-violet-400 hover:underline">top 100 highscores!</Link>
+              Congrats! you reached the{" "}
+              <Link
+                href="/highscores"
+                className="text-violet-400 hover:underline"
+              >
+                top 100 highscores!
+              </Link>
             </p>
           ) : (
             <p className="text-sm text-yellow-500">
-              Unfortunately, you didn&apos;t reach the <Link href="/highscores" className="text-violet-400 hover:underline">top 100 highscores</Link>.
+              Unfortunately, you didn&apos;t reach the{" "}
+              <Link
+                href="/highscores"
+                className="text-violet-400 hover:underline"
+              >
+                top 100 highscores
+              </Link>
+              .
             </p>
           )}
         </>

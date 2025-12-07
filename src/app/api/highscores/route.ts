@@ -19,7 +19,7 @@ export async function POST(request: Request) {
           path,
         })),
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -30,15 +30,12 @@ export async function POST(request: Request) {
   if (await gameHistoryExists(gameHistoryHashsum)) {
     return Response.json(
       { message: "This game history has already been submitted." },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
   if (!validateKeyRecording(gameHistory)) {
-    return Response.json(
-      { message: "Invalid game history." },
-      { status: 400 }
-    );
+    return Response.json({ message: "Invalid game history." }, { status: 400 });
   }
 
   await HighScore.build(PutItemCommand)

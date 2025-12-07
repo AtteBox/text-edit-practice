@@ -1,8 +1,8 @@
 import { Table } from "dynamodb-toolbox/table";
 import { Entity } from "dynamodb-toolbox/entity";
-import { item } from 'dynamodb-toolbox/schema/item'
-import { string } from 'dynamodb-toolbox/schema/string'
-import { number } from 'dynamodb-toolbox/schema/number'
+import { item } from "dynamodb-toolbox/schema/item";
+import { string } from "dynamodb-toolbox/schema/string";
+import { number } from "dynamodb-toolbox/schema/number";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
@@ -20,19 +20,20 @@ export const HighScoresTable = new Table({
   sortKey: {
     name: "entityId",
     type: "string",
-  },indexes: {
+  },
+  indexes: {
     gameHistoryHashsumIndex: {
-      type: 'local',
-      sortKey: { name: 'gameHistoryHashsum', type: 'string' }
-    }
-  }
+      type: "local",
+      sortKey: { name: "gameHistoryHashsum", type: "string" },
+    },
+  },
 });
 
 export const HighScore = new Entity({
   table: HighScoresTable,
   name: "HighScore",
   schema: item({
-    entityType: string().enum('highscore').key(),
+    entityType: string().enum("highscore").key(),
     entityId: string().key(),
     username: string(),
     score: number().key(),

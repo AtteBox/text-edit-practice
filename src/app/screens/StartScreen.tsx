@@ -36,7 +36,11 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
         </button>
       </div>
       <p className="text-sm text-gray-300">
-        The name is used for the <Link href="/highscores" className="text-violet-400 hover:underline">highscores</Link> list
+        The name is used for the{" "}
+        <Link href="/highscores" className="text-violet-400 hover:underline">
+          highscores
+        </Link>{" "}
+        list
       </p>
       <div className="text-red-500 text-sm min-h-5">{validationMessage}</div>
     </div>
