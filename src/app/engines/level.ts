@@ -22,11 +22,13 @@ export function useLevelEngine({
 
   //when level changes, reset the game map
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGameMap(startContentToText(level.startContent));
   }, [level.startContent, setGameMap]);
 
   // when level changes, reset the cursor position
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCursorPos(
       getActualInitialCursorPos(level.cursorStartPos, level.startContent),
     );

@@ -58,6 +58,7 @@ export function useGameEngine({
   const totalPauseDuration = useMemo(
     () =>
       gameState.gamePauses.reduce(
+        // eslint-disable-next-line react-hooks/purity
         (acc, pause) => acc + ((pause.endTime ?? Date.now()) - pause.startTime),
         0,
       ),

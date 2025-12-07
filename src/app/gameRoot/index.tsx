@@ -58,6 +58,7 @@ function Screen({
         setShowLevelScreen(false);
       }, 1000);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowLevelScreen(true);
     }
   }, [game.levelFinished]);

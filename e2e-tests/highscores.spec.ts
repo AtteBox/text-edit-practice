@@ -1,4 +1,4 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 // Generate a consistent set of mock highscores for testing pagination
 function generateMockHighscores(count: number = 105) {
