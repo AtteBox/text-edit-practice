@@ -6,7 +6,20 @@ import { number } from "dynamodb-toolbox/schema/number";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-const dynamoDBClient = new DynamoDBClient();
+const config =
+  process.env.CUSTOM_AWS_ACCESS_KEY_ID &&
+  process.env.CUSTOM_AWS_SECRET_ACCESS_KEY &&
+  process.env.CUSTOM_AWS_REGION
+    ? {
+        credentials: {
+          accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.CUSTOM_AWS_SECRET_ACCESS_KEY!,
+        },
+        region: process.env.CUSTOM_AWS_REGION,
+      }
+    : {};
+
+const dynamoDBClient = new DynamoDBClient(config);
 
 const documentClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
