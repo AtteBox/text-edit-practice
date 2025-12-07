@@ -58,7 +58,10 @@ function Highscores() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col items-center mb-8">
         <h1 className="text-2xl font-bold mb-2 text-center">
-          <Link href="/" className="hover:text-violet-400 transition-colors cursor-pointer">
+          <Link
+            href="/"
+            className="hover:text-violet-400 transition-colors cursor-pointer"
+          >
             Typo Terminator&apos;s
           </Link>
         </h1>
@@ -195,7 +198,10 @@ function Highscores() {
 
       {/* Back to Game Button */}
       <div className="mt-10 flex justify-center">
-        <Link href="/" className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors">
+        <Link
+          href="/"
+          className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors"
+        >
           Back to Game
         </Link>
       </div>
