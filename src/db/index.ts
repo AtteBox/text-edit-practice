@@ -6,7 +6,18 @@ import { number } from "dynamodb-toolbox/schema/number";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-const dynamoDBClient = new DynamoDBClient();
+const config =
+  process.env.NETLIFY_AWS_ACCESS_KEY_ID &&
+  process.env.NETLIFY_AWS_SECRET_ACCESS_KEY
+    ? {
+        credentials: {
+          accessKeyId: process.env.NETLIFY_AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.NETLIFY_AWS_SECRET_ACCESS_KEY,
+        },
+      }
+    : {};
+
+const dynamoDBClient = new DynamoDBClient(config);
 
 const documentClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
