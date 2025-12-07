@@ -13,30 +13,30 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.788.0",
-    "@aws-sdk/lib-dynamodb": "^3.883.0",
-    "@tanstack/react-query": "^5.90.6",
+    "@aws-sdk/client-dynamodb": "^3.946.0",
+    "@aws-sdk/lib-dynamodb": "^3.946.0",
+    "@tanstack/react-query": "^5.90.12",
     "@vitejs/plugin-react": "^4.7.0",
-    "axios": "^1.13.1",
-    "dynamodb-toolbox": "^2.7.1",
-    "next": "^15.4.7",
+    "axios": "^1.13.2",
+    "dynamodb-toolbox": "^2.7.2",
+    "next": "^15.5.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.1",
-    "@types/node": "^20.19.11",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.6",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.33",
-    "eslint-config-prettier": "^9.1.0",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^20.19.25",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.7",
+    "eslint-config-prettier": "^9.1.2",
     "jsdom": "^25.0.1",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.6",
     "prettier": "3.6.2",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^3.4.18",
     "typescript": "^5.9.3",
-    "vitest": "^3.1.4"
+    "vitest": "^3.2.4"
   }
 }
