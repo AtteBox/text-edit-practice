@@ -1,6 +1,6 @@
 # Typo Terminator — Next Features
 
-## Recommended Features (Priority Order)
+## Recommended Features
 
 ### 1. Text Selection Levels (High Impact, Medium Effort)
 
@@ -47,13 +47,3 @@ The game already records every keystroke with timestamps via `useGameHistory`. S
 - **`src/app/screens/LevelScreen.tsx:145`** — Fix the `@ts-expect-error` by replacing the nested reduce with a flat `Record<string, string>` lookup map.
 - **`e2e-tests/game.spec.ts:100`** — Investigate and fix the Safari/webkit test skip.
 - Clean up unused font imports in `layout.tsx`.
-
-## Suggested Implementation Order
-
-**Quick wins first:** Features 3 (retry) and 5 (tech debt) are small and independent — do these first.
-
-**Main feature:** Feature 1 (text selection) is the highest-impact gameplay addition.
-
-**Follow-up:** Feature 2 (Home/End) shares engine changes with Feature 1 — design together, implement after.
-
-**Polish:** Feature 4 (statistics) leverages existing data infrastructure for low-cost value.
