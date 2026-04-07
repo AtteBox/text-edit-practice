@@ -69,8 +69,9 @@ function Highscores() {
           <Image
             src={startBanner}
             alt="Typo Terminator Banner"
-            priority
             className="max-w-full rounded-lg"
+            loading="lazy"
+            placeholder="blur"
           />
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-8xl text-black drop-shadow-lg px-4 text-center">

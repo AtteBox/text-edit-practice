@@ -34,6 +34,8 @@ export function GameRoot() {
               src={gihubLogo}
               alt="Github logo"
               className="w-4 h-4 ml-3 inline-block"
+              loading="lazy"
+              placeholder="empty"
             />
           </a>
         </span>

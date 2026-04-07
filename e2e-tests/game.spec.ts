@@ -1,9 +1,8 @@
 import { test, expect, Page } from "@playwright/test";
 import { keysByLevel, level1FailKeys, level5FailKeys } from "./keySequences";
 
-const isMac = process.platform === "darwin";
-
 test("when page is loaded, initially show start view", async ({ page }) => {
+
   await page.goto("/");
   await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
   await expect(page.getByRole("button", { name: "Start Game" })).toBeVisible();
@@ -221,7 +220,8 @@ test("when playing a level, user can pause and resume the game", async ({
  * @param key key to press
  */
 async function pressGameKey(page: Page, key: string) {
-  await page.keyboard.press(isMac ? key.replace("Control", "Alt") : key);
+  const mac = await isMac(page);
+  await page.keyboard.press(mac ? key.replace("Control", "Alt") : key);
 }
 
 /**
@@ -250,4 +250,8 @@ async function extractTime(page: Page) {
   const timeText = await time.textContent();
   const match = timeText!.match(timeRegex);
   return Number(match![1]);
+}
+
+export async function isMac(page: Page): Promise<boolean> {
+  return page.evaluate(() => navigator.platform.toUpperCase().indexOf("MAC") >= 0);
 }
