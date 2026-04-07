@@ -9,8 +9,12 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      cooldown:
-        default-days: 3
+    cooldown:
+      default-days: 3
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
     ignore:
       # For all deps
       - dependency-name: "*"
