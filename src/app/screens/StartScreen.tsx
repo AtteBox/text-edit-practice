@@ -19,7 +19,12 @@ function StartScreen({ game }: { game: IGameEngineResult }) {
       <p className="text-sm">
         A game where you swiftly eliminate unwanted characters!
       </p>
-      <Image src={startBanner} alt="Typo Terminator Banner" />
+      <Image
+        src={startBanner}
+        alt="Typo Terminator Banner"
+        loading="lazy"
+        placeholder="blur"
+      />
       <div className="flex gap-4 mt-4 flex-row items-stretch h-13">
         <input
           className="rounded-md text-black placeholder:text-center p-2"
