@@ -4,7 +4,7 @@ import {
   getGermCount,
   startContentToText,
 } from "../gameUtilities";
-import { calcTextarea } from "../virtualTextarea";
+import { calcTextarea, ITextareaState } from "../virtualTextarea";
 
 export type IKeyRecording = {
   level: number;
@@ -22,23 +22,25 @@ export function validateKeyRecording(keyRecording: IKeyRecording): boolean {
       return false;
     }
 
-    let text = startContentToText(level.startContent);
-    let cursorPos: number = getActualInitialCursorPos(
-      level.cursorStartPos,
-      level.startContent,
-    );
+    let textareaState: ITextareaState = {
+      text: startContentToText(level.startContent),
+      cursorPos: getActualInitialCursorPos(
+        level.cursorStartPos,
+        level.startContent,
+      ),
+      selectionAnchor: null,
+      clipboard: "",
+    };
     for (const pressedKey of levelRecording.pressedKeys) {
       if (pressedKey.timestamp < previousKeyDownTimestamp) {
         return false;
       }
       previousKeyDownTimestamp = pressedKey.timestamp;
 
-      const result = calcTextarea(cursorPos, text, pressedKey.keyCombination);
-      cursorPos = result.cursorPos;
-      text = result.text;
+      textareaState = calcTextarea(textareaState, pressedKey.keyCombination);
     }
 
-    if (getGermCount(text) > 0) {
+    if (getGermCount(textareaState.text) > 0) {
       return false;
     }
   }
