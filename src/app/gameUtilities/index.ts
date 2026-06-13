@@ -114,8 +114,15 @@ export function calcPoints(gameState: ILevelState, level: ILevel) {
   const content = level.startContent.join("");
   const totalGerms = getGermCount(content);
   const totalAnimals = getAnimalCount(content);
-  const germRatio =
-    totalGerms === 0 ? 1 : 1 - (gameState.germs ?? 0) / totalGerms;
+  // Target-content levels are scored on whether the goal is reached (there are
+  // no germs to count); germ levels are scored on how many germs remain.
+  const goalRatio = level.targetContent
+    ? gameState.goalReached
+      ? 1
+      : 0
+    : totalGerms === 0
+      ? 1
+      : 1 - (gameState.germs ?? 0) / totalGerms;
   // clamped to 0 so that adding extra animals (e.g. by pasting) never adds points
   const animalRatio =
     totalAnimals === 0
@@ -128,7 +135,7 @@ export function calcPoints(gameState: ILevelState, level: ILevel) {
   );
   return Math.max(
     Math.floor(
-      (germRatio + 2 * animalRatio + timeRatio) * level.pointCoefficient,
+      (goalRatio + 2 * animalRatio + timeRatio) * level.pointCoefficient,
     ),
     0,
   );

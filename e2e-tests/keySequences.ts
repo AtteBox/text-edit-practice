@@ -728,6 +728,53 @@ export const keysByLevel = [
     "ArrowLeft",
     "Control+Backspace",
   ],
+  // Level 6: select germ words with shift and delete them
+  [
+    "Control+Shift+ArrowLeft",
+    "Backspace",
+    "Control+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowRight",
+    "Backspace",
+    "Control+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowRight",
+    "Backspace",
+  ],
+  // Level 7: cut " 🐭" and paste it after "🐶"
+  [
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Control+x",
+    "Control+ArrowLeft",
+    "ArrowLeft",
+    "Control+v",
+  ],
+  // Level 8: copy " 🐞 🦋" and paste it at the end
+  [
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Control+c",
+    "ArrowRight",
+    "Control+v",
+  ],
+];
+
+// Fails level 6 by deleting the animal words instead of the germs, leaving
+// zero animals (and thus zero points). Used to exercise a non-target failure.
+export const level6FailKeys = [
+  "Control+Shift+ArrowLeft",
+  "Backspace",
+  "Control+Shift+ArrowLeft",
+  "Backspace",
+  "Control+Shift+ArrowLeft",
+  "Backspace",
+  "Control+Shift+ArrowLeft",
+  "Backspace",
+  "Control+Shift+ArrowLeft",
+  "Backspace",
 ];
 
 export const level1FailKeys = [

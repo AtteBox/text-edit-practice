@@ -53,6 +53,25 @@ describe("calcPoints", () => {
     );
   });
 
+  it("scores a target-content level by goal completion, not germs", () => {
+    const level = aLevel({
+      startContent: ["🐶 🐱 🐭"],
+      targetContent: ["🐶 🐭 🐱"],
+      targetTimeSeconds: 1000,
+      pointCoefficient: 150,
+    });
+    // before the goal is reached the level is worth nothing
+    const unfinished = aLevelState({ animals: 3, goalReached: false });
+    expect(calcPoints(unfinished, level)).toBe(0);
+    // once matched (all animals kept, negligible time) it earns full points
+    const finished = aLevelState({
+      animals: 3,
+      goalReached: true,
+      elapsedTime: 0,
+    });
+    expect(calcPoints(finished, level)).toBe(150);
+  });
+
   it("keeps legacy scoring stable", () => {
     // 1 germ, 2 animals start; all germs removed, all animals kept, no time
     const level = aLevel({

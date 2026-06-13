@@ -99,6 +99,7 @@ export function useGameEngine({
           level: state.currentLevel,
           germs: state.germs,
           animals: state.animals,
+          goalReached: state.goalReached,
           startTime: state.startTime,
           elapsedTime: state.elapsedTime,
           levelFinished: true,
