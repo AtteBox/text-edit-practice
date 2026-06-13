@@ -128,6 +128,9 @@ test("when a target level runs out of time, it fails", async ({
   browserName,
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
+  // Playing levels 1-6 and then idling on level 7 takes a while, so give the
+  // test plenty of headroom beyond the default 30s budget.
+  test.setTimeout(120_000);
   // Shrink the level 7/8 time limit so the timeout fires quickly. Only levels
   // that already have a maxTimeSeconds are affected, so levels 1-6 are normal.
   await page.addInitScript(() => {
@@ -162,6 +165,8 @@ test("when played through the game, show finished game view and calculate total 
   browserName,
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
+  // The playthrough now spans 8 levels, so allow more than the default budget.
+  test.setTimeout(120_000);
   await page.goto("/");
   await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
@@ -172,13 +177,14 @@ test("when played through the game, show finished game view and calculate total 
     // points should be zero at the beginning of each level
     await expect(extractPoints(page)).resolves.toBe(0);
     // Level 7 is the first target level: it shows the target panel and the
-    // cut/paste key tags.
+    // cut/paste key tags. Match the tag explanation text (in parentheses) so
+    // we don't collide with the title/description, which also contain "paste".
     if (i === 6) {
       await expect(
         page.getByText("make the text look like this", { exact: false }),
       ).toBeVisible();
-      await expect(page.getByText("cut selection")).toBeVisible();
-      await expect(page.getByText("paste")).toBeVisible();
+      await expect(page.getByText("(cut selection)")).toBeVisible();
+      await expect(page.getByText("(paste)")).toBeVisible();
     }
     for (const key of keysByLevel[i]) {
       await pressGameKey(page, key);
