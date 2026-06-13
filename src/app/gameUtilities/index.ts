@@ -29,10 +29,21 @@ export type ILevel = {
   title: string;
   description: string;
   startContent: string[];
+  /**
+   * When set, the level is won by making the text match this content
+   * instead of removing all germs.
+   */
+  targetContent?: string[];
   allowedKeyCombinations: string[][];
   cursorStartPos: ICursorStartPos;
   postLevelMessage: string;
   targetTimeSeconds: number;
+  /**
+   * When set, the level automatically fails after this many seconds.
+   * Should be well above the time at which points drain to zero
+   * (e.g. 3x targetTimeSeconds).
+   */
+  maxTimeSeconds?: number;
   pointCoefficient: number;
 };
 
@@ -93,14 +104,23 @@ type ILevelState = {
   startTime: number;
   elapsedTime: number;
   levelFinished: boolean;
+  goalReached?: boolean;
+  timedOut?: boolean;
   isPaused: boolean;
   gamePauses: { startTime: number; endTime?: number }[];
 };
 
 export function calcPoints(gameState: ILevelState, level: ILevel) {
   const content = level.startContent.join("");
-  const germRatio = 1 - (gameState.germs ?? 0) / getGermCount(content);
-  const animalRatio = -(1 - (gameState.animals ?? 0) / getAnimalCount(content));
+  const totalGerms = getGermCount(content);
+  const totalAnimals = getAnimalCount(content);
+  const germRatio =
+    totalGerms === 0 ? 1 : 1 - (gameState.germs ?? 0) / totalGerms;
+  // clamped to 0 so that adding extra animals (e.g. by pasting) never adds points
+  const animalRatio =
+    totalAnimals === 0
+      ? 0
+      : Math.min(-(1 - (gameState.animals ?? 0) / totalAnimals), 0);
 
   const timeRatio = -Math.max(
     gameState.elapsedTime / 1000 / level.targetTimeSeconds,
@@ -174,4 +194,32 @@ export function getActualInitialCursorPos(
 
 export function startContentToText(startContent: string[]) {
   return startContent.join("\n");
+}
+
+export function isLevelGoalReached(
+  level: ILevel,
+  textContent: string,
+): boolean {
+  if (level.targetContent) {
+    return textContent === startContentToText(level.targetContent);
+  }
+  return getGermCount(textContent) === 0;
+}
+
+declare global {
+  var __typoTerminatorTestOverrides:
+    | { maxTimeSecondsOverride?: number }
+    | undefined;
+}
+
+export function isLevelTimedOut(level: ILevel, elapsedTime: number): boolean {
+  if (level.maxTimeSeconds === undefined) {
+    return false;
+  }
+  const maxTimeSeconds =
+    process.env.NODE_ENV !== "production"
+      ? (globalThis.__typoTerminatorTestOverrides?.maxTimeSecondsOverride ??
+        level.maxTimeSeconds)
+      : level.maxTimeSeconds;
+  return elapsedTime / 1000 >= maxTimeSeconds;
 }
