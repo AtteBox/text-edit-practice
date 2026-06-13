@@ -1,7 +1,7 @@
 import { levels } from "../levels";
 import {
   getActualInitialCursorPos,
-  getGermCount,
+  isLevelGoalReached,
   startContentToText,
 } from "../gameUtilities";
 import { calcTextarea, ITextareaState } from "../virtualTextarea";
@@ -22,6 +22,10 @@ export function validateKeyRecording(keyRecording: IKeyRecording): boolean {
       return false;
     }
 
+    const allowedKeyCombinations = new Set(
+      level.allowedKeyCombinations.map((combination) => combination.join("+")),
+    );
+
     let textareaState: ITextareaState = {
       text: startContentToText(level.startContent),
       cursorPos: getActualInitialCursorPos(
@@ -37,10 +41,14 @@ export function validateKeyRecording(keyRecording: IKeyRecording): boolean {
       }
       previousKeyDownTimestamp = pressedKey.timestamp;
 
+      if (!allowedKeyCombinations.has(pressedKey.keyCombination.join("+"))) {
+        return false;
+      }
+
       textareaState = calcTextarea(textareaState, pressedKey.keyCombination);
     }
 
-    if (getGermCount(textareaState.text) > 0) {
+    if (!isLevelGoalReached(level, textareaState.text)) {
       return false;
     }
   }
