@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ctrlEquivalentPressed } from "../utils";
+import { clipboardModifierPressed, ctrlEquivalentPressed, isMac } from "../utils";
 import { calcTextarea, ITextareaState } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
 import {
@@ -7,6 +7,54 @@ import {
   ILevel,
   startContentToText,
 } from "../gameUtilities";
+
+/**
+ * Matches a physical keyboard event against a platform-neutral key
+ * combination such as ["ctrl", "shift", "ArrowLeft"] or ["ctrl", "x"].
+ *
+ * Word/navigation ctrl combos map to Ctrl on Windows/Linux and Option on Mac.
+ * Clipboard combos (ctrl + x/c/v) map to Ctrl on Windows/Linux and Cmd on Mac;
+ * their letter is matched via e.code since Option/Cmd can alter e.key.
+ */
+function matchesKeyCombination(
+  e: globalThis.KeyboardEvent,
+  keyCombination: string[],
+): boolean {
+  const baseKey = keyCombination[keyCombination.length - 1];
+  const modifiers = keyCombination.slice(0, -1);
+  const wantCtrl = modifiers.includes("ctrl");
+  const wantShift = modifiers.includes("shift");
+  const isClipboard =
+    wantCtrl && (baseKey === "x" || baseKey === "c" || baseKey === "v");
+
+  if (e.shiftKey !== wantShift) {
+    return false;
+  }
+
+  const ctrlModifierPressed = isClipboard
+    ? clipboardModifierPressed(e)
+    : ctrlEquivalentPressed(e);
+  if (ctrlModifierPressed !== wantCtrl) {
+    return false;
+  }
+
+  // Reject stray command modifiers this combo does not use, so that e.g.
+  // Cmd+ArrowLeft on Mac doesn't trigger a Ctrl word move.
+  if (isMac()) {
+    if (e.ctrlKey) {
+      return false;
+    }
+    if (isClipboard ? e.altKey : e.metaKey) {
+      return false;
+    }
+  } else if (e.metaKey || e.altKey) {
+    return false;
+  }
+
+  return isClipboard
+    ? e.code === `Key${baseKey.toUpperCase()}`
+    : e.key === baseKey;
+}
 
 function initialTextareaState(
   level: Pick<ILevel, "startContent" | "cursorStartPos">,
@@ -65,31 +113,12 @@ export function useLevelEngine({
 
   const handleKeyDown = useCallback(
     (e: globalThis.KeyboardEvent) => {
-      const pressedModifierCount = [
-        e.ctrlKey,
-        e.metaKey,
-        e.altKey,
-        e.shiftKey,
-      ].filter((pressed) => pressed).length;
       for (const keyCombination of level.allowedKeyCombinations) {
-        if (
-          pressedModifierCount === 0 &&
-          keyCombination.length === 1 &&
-          e.key === keyCombination[0]
-        ) {
+        if (matchesKeyCombination(e, keyCombination)) {
+          // prevent the browser's native clipboard/selection actions
+          e.preventDefault();
           handleAllowedKeyCombination(keyCombination);
           return;
-        }
-        if (pressedModifierCount === 1 && keyCombination.length === 2) {
-          const [ctrlKey, keyName] = keyCombination;
-          if (
-            ctrlKey === "ctrl" &&
-            ctrlEquivalentPressed(e) &&
-            e.key === keyName
-          ) {
-            handleAllowedKeyCombination(keyCombination);
-            return;
-          }
         }
       }
       // prevent disallowed key combinations

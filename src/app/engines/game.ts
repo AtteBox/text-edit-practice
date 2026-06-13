@@ -7,6 +7,8 @@ import {
   IGameState,
   ILevel,
   ILevelResult,
+  isLevelGoalReached,
+  isLevelTimedOut,
 } from "../gameUtilities";
 import { usernameSchema } from "../../schema";
 
@@ -53,7 +55,8 @@ export function useGameEngine({
 
   const isLastLevel = gameState.currentLevel === levels.length;
   const levelFailed =
-    !!gameState.levelFinished && calcPoints(gameState, level) <= 0;
+    !!gameState.levelFinished &&
+    (calcPoints(gameState, level) <= 0 || !!gameState.timedOut);
 
   const totalPauseDuration = useMemo(
     () =>
@@ -81,6 +84,8 @@ export function useGameEngine({
     setGameState((state) => ({
       ...state,
       levelFinished: false,
+      goalReached: undefined,
+      timedOut: undefined,
       germs: undefined,
       animals: undefined,
       startTime: Date.now(),
@@ -171,9 +176,10 @@ export function useGameEngine({
     ({ textContent }: { textContent: string }) => {
       const germs = getGermCount(textContent);
       const animals = getAnimalCount(textContent);
-      updateGameState({ germs, animals });
+      const goalReached = isLevelGoalReached(level, textContent);
+      updateGameState({ germs, animals, goalReached });
     },
-    [updateGameState],
+    [updateGameState, level],
   );
 
   const currentLevelPoints = useMemo(
@@ -219,10 +225,27 @@ export function useGameEngine({
   const isGameFinished = isLastLevel && gameState.levelFinished;
 
   useEffect(() => {
-    if (gameState.germs === 0) {
+    if (gameState.goalReached) {
       updateGameState({ levelFinished: true });
     }
-  }, [gameState.germs, updateGameState]);
+  }, [gameState.goalReached, updateGameState]);
+
+  // auto-fail levels that run past their maximum time
+  useEffect(() => {
+    if (
+      gameState.gameHasStarted &&
+      !gameState.levelFinished &&
+      isLevelTimedOut(level, gameState.elapsedTime)
+    ) {
+      updateGameState({ levelFinished: true, timedOut: true });
+    }
+  }, [
+    gameState.elapsedTime,
+    gameState.gameHasStarted,
+    gameState.levelFinished,
+    level,
+    updateGameState,
+  ]);
 
   useEffect(() => {
     if (
