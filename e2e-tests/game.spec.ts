@@ -1,5 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
-import { keysByLevel, level1FailKeys, level5FailKeys } from "./keySequences";
+import { keysByLevel, level1FailKeys, level6FailKeys } from "./keySequences";
 
 test("when page is loaded, initially show start view", async ({ page }) => {
 
@@ -92,7 +92,7 @@ test("when played through first level with too many mistakes, show level failed 
   await expect(page.getByText("Welcome to Typo Terminator!")).toBeVisible();
 });
 
-test("when played through last level with too many mistakes, show level failed message", async ({
+test("when a germ level is failed with too many mistakes, show level failed message", async ({
   page,
   browserName,
 }) => {
@@ -100,14 +100,18 @@ test("when played through last level with too many mistakes, show level failed m
   await page.goto("/");
   await page.fill("input", "Test User");
   await page.getByRole("button", { name: "Start Game" }).click();
-  for (let i = 0; i < keysByLevel.length; i++) {
-    const isLastLevel = i === keysByLevel.length - 1;
-    const levelKeys = isLastLevel ? level5FailKeys : keysByLevel[i];
+  // The last level is a target level that can only fail by timeout, so fail
+  // level 6 instead: clearing every word removes the germs (the goal) but
+  // also every animal, dropping the score to zero.
+  const failLevelIndex = 5; // level 6
+  for (let i = 0; i <= failLevelIndex; i++) {
+    const isFailLevel = i === failLevelIndex;
+    const levelKeys = isFailLevel ? level6FailKeys : keysByLevel[i];
     await expect(page.getByText(`Level ${i + 1}`)).toBeVisible();
     for (const key of levelKeys) {
       await pressGameKey(page, key);
     }
-    if (isLastLevel) {
+    if (isFailLevel) {
       await expect(page.getByText(`Level ${i + 1} Failed`)).toBeVisible();
       await expect(
         page.getByText(`Level ${i + 1} Completed`),
@@ -117,6 +121,40 @@ test("when played through last level with too many mistakes, show level failed m
       await page.getByRole("button", { name: "Next Level" }).click();
     }
   }
+});
+
+test("when a target level runs out of time, it fails", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName === "webkit", "TODO: Still working on it");
+  // Shrink the level 7/8 time limit so the timeout fires quickly. Only levels
+  // that already have a maxTimeSeconds are affected, so levels 1-6 are normal.
+  await page.addInitScript(() => {
+    (
+      globalThis as unknown as {
+        __typoTerminatorTestOverrides?: { maxTimeSecondsOverride?: number };
+      }
+    ).__typoTerminatorTestOverrides = { maxTimeSecondsOverride: 3 };
+  });
+  await page.goto("/");
+  await page.fill("input", "Test User");
+  await page.getByRole("button", { name: "Start Game" }).click();
+  // Play levels 1-6 normally (they have no time limit)
+  for (let i = 0; i < 6; i++) {
+    await expect(page.getByText(`Level ${i + 1}`)).toBeVisible();
+    for (const key of keysByLevel[i]) {
+      await pressGameKey(page, key);
+    }
+    await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
+    await page.getByRole("button", { name: "Next Level" }).click();
+  }
+  // Level 7 has a time limit; idle and let it time out
+  await expect(page.getByText("Level 7", { exact: false })).toBeVisible();
+  await expect(page.getByText("Time limit:", { exact: false })).toBeVisible();
+  await expect(page.getByText("Level 7 Failed")).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test("when played through the game, show finished game view and calculate total points correctly. Also persist history to db", async ({
@@ -133,6 +171,15 @@ test("when played through the game, show finished game view and calculate total 
     await expect(page.getByText(`Level ${i + 1}`)).toBeVisible();
     // points should be zero at the beginning of each level
     await expect(extractPoints(page)).resolves.toBe(0);
+    // Level 7 is the first target level: it shows the target panel and the
+    // cut/paste key tags.
+    if (i === 6) {
+      await expect(
+        page.getByText("make the text look like this", { exact: false }),
+      ).toBeVisible();
+      await expect(page.getByText("cut selection")).toBeVisible();
+      await expect(page.getByText("paste")).toBeVisible();
+    }
     for (const key of keysByLevel[i]) {
       await pressGameKey(page, key);
     }
@@ -140,8 +187,8 @@ test("when played through the game, show finished game view and calculate total 
       await expect(page.getByText(`Congratulations!`)).toBeVisible();
       await expect(
         page.getByText("Time:", { exact: false }),
-        "should have finished and recorded 5 levels",
-      ).toHaveCount(5);
+        "should have finished and recorded all levels",
+      ).toHaveCount(keysByLevel.length);
     } else {
       await expect(page.getByText(`Level ${i + 1} Completed`)).toBeVisible();
     }
@@ -221,7 +268,17 @@ test("when playing a level, user can pause and resume the game", async ({
  */
 async function pressGameKey(page: Page, key: string) {
   const mac = await isMac(page);
-  await page.keyboard.press(mac ? key.replace("Control", "Alt") : key);
+  if (!mac) {
+    await page.keyboard.press(key);
+    return;
+  }
+  // On Mac, clipboard combos use Cmd (Meta) while word/navigation combos use
+  // Option (Alt). Shift is unchanged.
+  const isClipboard =
+    key === "Control+x" || key === "Control+c" || key === "Control+v";
+  await page.keyboard.press(
+    key.replace("Control", isClipboard ? "Meta" : "Alt"),
+  );
 }
 
 /**
