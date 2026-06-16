@@ -24,10 +24,10 @@ describe("Game Validation", () => {
     expect(result).toBe(false);
   });
   it("fail in level 7 when the target is not reached", () => {
-    // cut the word but never paste it back: text no longer matches target
+    // cut a word but never paste it back: text no longer matches target
     const keyRecording = mapToVirtualTextareaKeyRecording(keysByLevel, {
       level: 7,
-      keys: ["Shift+ArrowLeft", "Shift+ArrowLeft", "Control+x"],
+      keys: ["Control+ArrowLeft", "Control+Shift+ArrowLeft", "Control+x"],
     });
     const result = validateKeyRecording(keyRecording);
     expect(result).toBe(false);
@@ -819,13 +819,21 @@ const keysByLevel = [
     "Control+Shift+ArrowRight",
     "Backspace",
   ],
-  // Level 7: cut " 🐭" and paste it after "🐶"
+  // Level 7: move whole words with Ctrl+Shift selection to reach the target
   [
-    "Shift+ArrowLeft",
-    "Shift+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
     "Control+x",
     "Control+ArrowLeft",
-    "ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+v",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
+    "Control+x",
+    "Control+ArrowLeft",
     "Control+v",
   ],
   // Level 8: copy " 🐞 🦋" and paste it at the end

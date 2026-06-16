@@ -115,7 +115,7 @@ export const levels: ILevel[] = [
     pointCoefficient: 200,
   },
   {
-    title: "Level 5: Mastering All Editing Techniques",
+    title: "Level 5: Combining All Deletion and Navigation Keys",
     description:
       "This is the ultimate test! Remove all the spiders from the text using all the key combinations you've learned so far. Use control key combinations for efficient word navigation and deletion, and use normal keys for precise character editing.",
     startContent: [
@@ -183,24 +183,22 @@ export const levels: ILevel[] = [
   {
     title: "Level 7: Cut and Paste",
     description:
-      "Rearrange the animals so the text matches the target below. Select a word with Shift, cut it with Ctrl+X, move the cursor where it belongs, and paste it with Ctrl+V. Tip: select the space along with the word so the spacing stays correct.",
-    startContent: ["🐶 🐱 🐭"],
-    targetContent: ["🐶 🐭 🐱"],
+      "Rearrange the animals so the text matches the target below. Hold Ctrl+Shift with the arrow keys to select a whole word at a time, cut it with Ctrl+X, jump between words with Ctrl and the arrow keys, and paste it where it belongs with Ctrl+V. Tip: selecting leftward grabs the word together with the space after it, so the spacing stays correct.",
+    startContent: ["🐶 🐱 🐭 🐹 🐰"],
+    targetContent: ["🐶 🐹 🐭 🐱 🐰"],
     allowedKeyCombinations: [
       ["ctrl", "x"],
       ["ctrl", "v"],
-      ["shift", "ArrowLeft"],
-      ["shift", "ArrowRight"],
+      ["ctrl", "shift", "ArrowLeft"],
+      ["ctrl", "shift", "ArrowRight"],
       ["ctrl", "ArrowLeft"],
       ["ctrl", "ArrowRight"],
-      ["ArrowLeft"],
-      ["ArrowRight"],
     ],
     cursorStartPos: "end",
     postLevelMessage:
-      "Great cut! Cutting moves text around. Copying, on the other hand, duplicates it — let's try that next.",
-    targetTimeSeconds: 30,
-    maxTimeSeconds: 90,
+      "Great cut! Cutting moves whole words around. Copying, on the other hand, duplicates them — let's try that next.",
+    targetTimeSeconds: 45,
+    maxTimeSeconds: 135,
     pointCoefficient: 150,
   },
   {

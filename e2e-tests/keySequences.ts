@@ -741,13 +741,21 @@ export const keysByLevel = [
     "Control+Shift+ArrowRight",
     "Backspace",
   ],
-  // Level 7: cut " 🐭" and paste it after "🐶"
+  // Level 7: move whole words with Ctrl+Shift selection to reach the target
   [
-    "Shift+ArrowLeft",
-    "Shift+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
     "Control+x",
     "Control+ArrowLeft",
-    "ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+v",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
+    "Control+x",
+    "Control+ArrowLeft",
     "Control+v",
   ],
   // Level 8: copy " 🐞 🦋" and paste it at the end
