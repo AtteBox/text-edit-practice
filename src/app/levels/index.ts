@@ -115,7 +115,7 @@ export const levels: ILevel[] = [
     pointCoefficient: 200,
   },
   {
-    title: "Level 5: Mastering All Editing Techniques",
+    title: "Level 5: Combining All Deletion and Navigation Keys",
     description:
       "This is the ultimate test! Remove all the spiders from the text using all the key combinations you've learned so far. Use control key combinations for efficient word navigation and deletion, and use normal keys for precise character editing.",
     startContent: [
@@ -154,8 +154,74 @@ export const levels: ILevel[] = [
     ],
     cursorStartPos: "middle",
     postLevelMessage:
-      "Outstanding! You've mastered all the editing techniques. You're now a text editing expert!",
+      "Outstanding! You've mastered deleting and navigating. Next up: selecting text with the Shift key.",
     targetTimeSeconds: 180,
     pointCoefficient: 250,
+  },
+  {
+    title: "Level 6: Selecting Text with Shift",
+    description:
+      "Remove the germs by selecting them. Hold Shift with the arrow keys to grow a selection a letter or a word at a time, then press Backspace to delete it. Use the other navigation keys to move between the animal words you want to keep.",
+    startContent: ["🐶🐶 🦠🦠🦠 🐱🐱", "🦠🦠 🐰🐰 🦠🦠🦠"],
+    allowedKeyCombinations: [
+      ["ctrl", "shift", "ArrowLeft"],
+      ["ctrl", "shift", "ArrowRight"],
+      ["shift", "ArrowLeft"],
+      ["shift", "ArrowRight"],
+      ["ctrl", "ArrowLeft"],
+      ["ctrl", "ArrowRight"],
+      ["Backspace"],
+      ["ArrowLeft"],
+      ["ArrowRight"],
+    ],
+    cursorStartPos: "end",
+    postLevelMessage:
+      "Nicely done! Selecting text is the foundation for cutting, copying and pasting — which is exactly what's coming next.",
+    targetTimeSeconds: 45,
+    pointCoefficient: 150,
+  },
+  {
+    title: "Level 7: Cut and Paste",
+    description:
+      "Rearrange the animals so the text matches the target below. Hold Ctrl+Shift with the arrow keys to select a whole word at a time, cut it with Ctrl+X, jump between words with Ctrl and the arrow keys, and paste it where it belongs with Ctrl+V. Tip: selecting leftward grabs the word together with the space after it, so the spacing stays correct.",
+    startContent: ["🐶 🐱 🐭 🐹 🐰"],
+    targetContent: ["🐶 🐹 🐭 🐱 🐰"],
+    allowedKeyCombinations: [
+      ["ctrl", "x"],
+      ["ctrl", "v"],
+      ["ctrl", "shift", "ArrowLeft"],
+      ["ctrl", "shift", "ArrowRight"],
+      ["ctrl", "ArrowLeft"],
+      ["ctrl", "ArrowRight"],
+    ],
+    cursorStartPos: "end",
+    postLevelMessage:
+      "Great cut! Cutting moves whole words around. Copying, on the other hand, duplicates them — let's try that next.",
+    targetTimeSeconds: 45,
+    maxTimeSeconds: 135,
+    pointCoefficient: 150,
+  },
+  {
+    title: "Level 8: Copy and Paste",
+    description:
+      "Duplicate the animals so the text matches the target below. Select the words you want to copy with Shift, copy them with Ctrl+C, move to the end and paste them with Ctrl+V.",
+    startContent: ["🐝 🐞 🦋"],
+    targetContent: ["🐝 🐞 🦋 🐞 🦋"],
+    allowedKeyCombinations: [
+      ["ctrl", "c"],
+      ["ctrl", "v"],
+      ["shift", "ArrowLeft"],
+      ["shift", "ArrowRight"],
+      ["ctrl", "ArrowLeft"],
+      ["ctrl", "ArrowRight"],
+      ["ArrowLeft"],
+      ["ArrowRight"],
+    ],
+    cursorStartPos: "end",
+    postLevelMessage:
+      "Outstanding! You've mastered selecting, cutting, copying and pasting. You're now a true text editing expert!",
+    targetTimeSeconds: 30,
+    maxTimeSeconds: 90,
+    pointCoefficient: 200,
   },
 ];

@@ -23,6 +23,22 @@ describe("Game Validation", () => {
     const result = validateKeyRecording(keyRecording);
     expect(result).toBe(false);
   });
+  it("fail in level 7 when the target is not reached", () => {
+    // cut a word but never paste it back: text no longer matches target
+    const keyRecording = mapToVirtualTextareaKeyRecording(keysByLevel, {
+      level: 7,
+      keys: ["Control+ArrowLeft", "Control+Shift+ArrowLeft", "Control+x"],
+    });
+    const result = validateKeyRecording(keyRecording);
+    expect(result).toBe(false);
+  });
+  it("fail when level 8 is missing", () => {
+    const keyRecording = mapToVirtualTextareaKeyRecording(keysByLevel).filter(
+      (recording) => recording.level !== 8,
+    );
+    const result = validateKeyRecording(keyRecording);
+    expect(result).toBe(false);
+  });
   it("invalid timestamps", () => {
     const keyRecording = mapToVirtualTextareaKeyRecording(keysByLevel);
     keyRecording[2].pressedKeys[3].timestamp = 0;
@@ -53,14 +69,11 @@ function mapToVirtualTextareaKeyRecording(
 }
 
 function mapToVirtualTextareaKeyCombination(keyCombination: string): string[] {
-  const keys = keyCombination.split("+");
-  if (keys.length === 1) {
-    return [keys[0]];
-  }
-  if (keys.length === 2) {
-    return [keys[0].replace("Control", "ctrl"), keys[1]];
-  }
-  return [];
+  return keyCombination
+    .split("+")
+    .map((key) =>
+      key === "Control" ? "ctrl" : key === "Shift" ? "shift" : key,
+    );
 }
 
 const keysByLevel = [
@@ -792,6 +805,46 @@ const keysByLevel = [
     "Backspace",
     "ArrowLeft",
     "Control+Backspace",
+  ],
+  // Level 6: select germ words with shift and delete them
+  [
+    "Control+Shift+ArrowLeft",
+    "Backspace",
+    "Control+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowRight",
+    "Backspace",
+    "Control+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowRight",
+    "Backspace",
+  ],
+  // Level 7: move whole words with Ctrl+Shift selection to reach the target
+  [
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
+    "Control+x",
+    "Control+ArrowLeft",
+    "Control+ArrowLeft",
+    "Control+v",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowRight",
+    "Control+ArrowLeft",
+    "Control+Shift+ArrowLeft",
+    "Control+x",
+    "Control+ArrowLeft",
+    "Control+v",
+  ],
+  // Level 8: copy " 🐞 🦋" and paste it at the end
+  [
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Shift+ArrowLeft",
+    "Control+c",
+    "ArrowRight",
+    "Control+v",
   ],
 ];
 
