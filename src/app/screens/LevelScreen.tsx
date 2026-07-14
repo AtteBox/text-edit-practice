@@ -1,10 +1,10 @@
-import { isMac } from "../utils";
 import { GameResultsBar } from "../components/GameResultsBar";
 import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
 import { IGameHistory } from "../engines/gameHistory";
 import { useCallback } from "react";
+import { useIsMac } from "../hooks/useIsMac";
 
 function LevelScreen({
   game,
@@ -119,8 +119,10 @@ function KeyCombinationTag({
     Delete: "remove letter on right",
   };
 
+  const mac = useIsMac();
+
   let actualKeyCombination = keyCombination;
-  if (isMac()) {
+  if (mac) {
     actualKeyCombination = actualKeyCombination.map((key) =>
       key === "ctrl" ? "option" : key,
     );
