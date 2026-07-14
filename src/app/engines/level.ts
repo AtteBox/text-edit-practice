@@ -1,11 +1,74 @@
 import { useCallback, useEffect, useState } from "react";
-import { ctrlEquivalentPressed } from "../utils";
-import { calcTextarea } from "../virtualTextarea";
+import { clipboardModifierPressed, ctrlEquivalentPressed, isMac } from "../utils";
+import { calcTextarea, ITextareaState } from "../virtualTextarea";
 import { IGameEngineResult } from "./game";
 import {
   getActualInitialCursorPos,
+  ILevel,
   startContentToText,
 } from "../gameUtilities";
+
+/**
+ * Matches a physical keyboard event against a platform-neutral key
+ * combination such as ["ctrl", "shift", "ArrowLeft"] or ["ctrl", "x"].
+ *
+ * Word/navigation ctrl combos map to Ctrl on Windows/Linux and Option on Mac.
+ * Clipboard combos (ctrl + x/c/v) map to Ctrl on Windows/Linux and Cmd on Mac;
+ * their letter is matched via e.code since Option/Cmd can alter e.key.
+ */
+function matchesKeyCombination(
+  e: globalThis.KeyboardEvent,
+  keyCombination: string[],
+): boolean {
+  const baseKey = keyCombination[keyCombination.length - 1];
+  const modifiers = keyCombination.slice(0, -1);
+  const wantCtrl = modifiers.includes("ctrl");
+  const wantShift = modifiers.includes("shift");
+  const isClipboard =
+    wantCtrl && (baseKey === "x" || baseKey === "c" || baseKey === "v");
+
+  if (e.shiftKey !== wantShift) {
+    return false;
+  }
+
+  const ctrlModifierPressed = isClipboard
+    ? clipboardModifierPressed(e)
+    : ctrlEquivalentPressed(e);
+  if (ctrlModifierPressed !== wantCtrl) {
+    return false;
+  }
+
+  // Reject stray command modifiers this combo does not use, so that e.g.
+  // Cmd+ArrowLeft on Mac doesn't trigger a Ctrl word move.
+  if (isMac()) {
+    if (e.ctrlKey) {
+      return false;
+    }
+    if (isClipboard ? e.altKey : e.metaKey) {
+      return false;
+    }
+  } else if (e.metaKey || e.altKey) {
+    return false;
+  }
+
+  return isClipboard
+    ? e.code === `Key${baseKey.toUpperCase()}`
+    : e.key === baseKey;
+}
+
+function initialTextareaState(
+  level: Pick<ILevel, "startContent" | "cursorStartPos">,
+): ITextareaState {
+  return {
+    text: startContentToText(level.startContent),
+    cursorPos: getActualInitialCursorPos(
+      level.cursorStartPos,
+      level.startContent,
+    ),
+    selectionAnchor: null,
+    clipboard: "",
+  };
+}
 
 export function useLevelEngine({
   game,
@@ -15,25 +78,21 @@ export function useLevelEngine({
   onKeyStroke: (keyCombination: string[]) => void;
 }) {
   const level = game.currentLevel;
-  const [gameMap, setGameMap] = useState<string>(
-    startContentToText(level.startContent),
+  const [textareaState, setTextareaState] = useState<ITextareaState>(() =>
+    initialTextareaState(level),
   );
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
     string[] | null
   >(null);
-  const [cursorPos, setCursorPos] = useState<number>(0);
 
-  //when level changes, reset the game map
+  //when level changes, reset the textarea state
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setGameMap(startContentToText(level.startContent));
-  }, [level.startContent, setGameMap]);
-
-  // when level changes, reset the cursor position
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCursorPos(
-      getActualInitialCursorPos(level.cursorStartPos, level.startContent),
+    setTextareaState(
+      initialTextareaState({
+        startContent: level.startContent,
+        cursorStartPos: level.cursorStartPos,
+      }),
     );
   }, [level.cursorStartPos, level.startContent]);
 
@@ -43,47 +102,23 @@ export function useLevelEngine({
     (keyCombination: string[]) => {
       setCurrentKeyCombination(keyCombination);
 
-      const { cursorPos: newCursorPos, text: newGameMap } = calcTextarea(
-        cursorPos,
-        gameMap,
-        keyCombination,
-      );
-      setGameMap(newGameMap);
-      setCursorPos(newCursorPos);
+      const newTextareaState = calcTextarea(textareaState, keyCombination);
+      setTextareaState(newTextareaState);
 
-      updateLevelStats({ textContent: newGameMap });
+      updateLevelStats({ textContent: newTextareaState.text });
       onKeyStroke(keyCombination);
     },
-    [gameMap, cursorPos, updateLevelStats, onKeyStroke],
+    [textareaState, updateLevelStats, onKeyStroke],
   );
 
   const handleKeyDown = useCallback(
     (e: globalThis.KeyboardEvent) => {
-      const pressedModifierCount = [
-        e.ctrlKey,
-        e.metaKey,
-        e.altKey,
-        e.shiftKey,
-      ].filter((pressed) => pressed).length;
       for (const keyCombination of level.allowedKeyCombinations) {
-        if (
-          pressedModifierCount === 0 &&
-          keyCombination.length === 1 &&
-          e.key === keyCombination[0]
-        ) {
+        if (matchesKeyCombination(e, keyCombination)) {
+          // prevent the browser's native clipboard/selection actions
+          e.preventDefault();
           handleAllowedKeyCombination(keyCombination);
           return;
-        }
-        if (pressedModifierCount === 1 && keyCombination.length === 2) {
-          const [ctrlKey, keyName] = keyCombination;
-          if (
-            ctrlKey === "ctrl" &&
-            ctrlEquivalentPressed(e) &&
-            e.key === keyName
-          ) {
-            handleAllowedKeyCombination(keyCombination);
-            return;
-          }
         }
       }
       // prevent disallowed key combinations
@@ -145,5 +180,19 @@ export function useLevelEngine({
     }
   }, [game.gameHasStarted, game.levelFinished, pauseGame]);
 
-  return { gameMap, currentKeyCombination, cursorPos };
+  const selection =
+    textareaState.selectionAnchor === null ||
+    textareaState.selectionAnchor === textareaState.cursorPos
+      ? null
+      : {
+          start: Math.min(textareaState.selectionAnchor, textareaState.cursorPos),
+          end: Math.max(textareaState.selectionAnchor, textareaState.cursorPos),
+        };
+
+  return {
+    gameMap: textareaState.text,
+    currentKeyCombination,
+    cursorPos: textareaState.cursorPos,
+    selection,
+  };
 }

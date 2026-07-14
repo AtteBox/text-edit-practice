@@ -1,4 +1,5 @@
 import z from "zod";
+import { levels } from "../app/levels";
 
 export const usernameSchema = z
   .string()
@@ -9,7 +10,7 @@ export const usernameSchema = z
     "Must consist of letters, digits and spaces. At least one letter. Consecutive spaces are not allowed.",
   );
 
-const LAST_LEVEL = 5;
+const LAST_LEVEL = levels.length;
 const MAX_KEYS_IN_LEVEL = 3000;
 const gameHistorySchema = z
   .array(
