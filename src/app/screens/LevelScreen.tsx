@@ -4,6 +4,7 @@ import LevelResultsBar from "../components/LevelResultsBar";
 import { useLevelEngine } from "../engines/level";
 import { IGameEngineResult } from "../engines/game";
 import { IGameHistory } from "../engines/gameHistory";
+import { startContentToText } from "../gameUtilities";
 import { useCallback } from "react";
 
 function LevelScreen({
@@ -19,10 +20,11 @@ function LevelScreen({
       saveKeyStroke(game.currentLevelNumber, keyCombination),
     [game.currentLevelNumber, saveKeyStroke],
   );
-  const { gameMap, currentKeyCombination, cursorPos } = useLevelEngine({
-    game,
-    onKeyStroke: handleKeyStroke,
-  });
+  const { gameMap, currentKeyCombination, cursorPos, selection } =
+    useLevelEngine({
+      game,
+      onKeyStroke: handleKeyStroke,
+    });
   const level = game.currentLevel;
 
   return (
@@ -61,13 +63,28 @@ function LevelScreen({
           </button>
         </div>
         <p className="text-sm">{level.description}</p>
+        {level.maxTimeSeconds !== undefined && (
+          <p className="text-sm font-semibold text-red-300">
+            Time limit: {level.maxTimeSeconds}s (the level fails if you run out
+            of time)
+          </p>
+        )}
         <GameResultsBar game={game} alignRight={false} />
         <LevelResultsBar levelResults={game} />
         <GameMap
           gameMap={gameMap}
           cursorPos={cursorPos}
+          selection={selection}
           isPaused={game.isPaused}
         />
+        {level.targetContent && (
+          <div>
+            <span className="text-sm">
+              Target — make the text look like this:
+            </span>
+            <TargetMap text={startContentToText(level.targetContent)} />
+          </div>
+        )}
         <div>
           <span className="text-sm">Allowed key combinations:</span>
           <div className="flex flex-wrap grow-0 gap-1">
@@ -87,6 +104,8 @@ function LevelScreen({
 
 export default LevelScreen;
 
+type Explanation = string | { [key: string]: Explanation };
+
 function KeyCombinationTag({
   keyCombination,
   isPressed,
@@ -96,22 +115,35 @@ function KeyCombinationTag({
 }) {
   const keyText: Record<string, string> = {
     ctrl: "Control",
+    shift: "Shift",
     Backspace: "Backspace",
     ArrowLeft: "Left Arrow",
     ArrowRight: "Right Arrow",
     Delete: "Delete",
     option: "Option",
+    cmd: "Command",
     fn: "Fn",
+    x: "X",
+    c: "C",
+    v: "V",
   };
-  const keyCombinationExplanation: Record<
-    string,
-    string | Record<string, string>
-  > = {
+  const keyCombinationExplanation: Record<string, Explanation> = {
     ctrl: {
       Backspace: "remove left word",
       ArrowLeft: "move a word left",
       ArrowRight: "move a word right",
       Delete: "remove right word",
+      x: "cut selection",
+      c: "copy selection",
+      v: "paste",
+      shift: {
+        ArrowLeft: "select a word left",
+        ArrowRight: "select a word right",
+      },
+    },
+    shift: {
+      ArrowLeft: "select a letter left",
+      ArrowRight: "select a letter right",
     },
     Backspace: "remove letter on left",
     ArrowLeft: "move a letter left",
@@ -119,15 +151,26 @@ function KeyCombinationTag({
     Delete: "remove letter on right",
   };
 
+  const baseKey = keyCombination[keyCombination.length - 1];
+  const isClipboard =
+    keyCombination.includes("ctrl") &&
+    (baseKey === "x" || baseKey === "c" || baseKey === "v");
+
   let actualKeyCombination = keyCombination;
   if (isMac()) {
     actualKeyCombination = actualKeyCombination.map((key) =>
-      key === "ctrl" ? "option" : key,
+      key === "ctrl" ? (isClipboard ? "cmd" : "option") : key,
     );
     actualKeyCombination = actualKeyCombination.flatMap((key) =>
       key === "Delete" ? ["fn", "Backspace"] : key,
     );
   }
+
+  const explanation = keyCombination.reduce<Explanation>(
+    (acc, curr) => (typeof acc === "string" ? acc : acc[curr]),
+    keyCombinationExplanation,
+  );
+
   return (
     <div className="flex flex-col items-center m-2 text-xs">
       <span
@@ -137,16 +180,10 @@ function KeyCombinationTag({
           transition: isPressed ? "none" : "background-color 0.7s ease",
         }}
       >
-        {actualKeyCombination.map((k) => keyText[k]).join(" + ")}
+        {actualKeyCombination.map((k) => keyText[k] ?? k).join(" + ")}
       </span>
       <span className="text-xs">
-        (
-        {keyCombination.reduce(
-          //@ts-expect-error "TODO: typescript typing of this reduce"
-          (acc, curr) => acc[curr],
-          keyCombinationExplanation,
-        )}
-        )
+        ({typeof explanation === "string" ? explanation : ""})
       </span>
     </div>
   );
@@ -155,10 +192,12 @@ function KeyCombinationTag({
 function GameMap({
   gameMap,
   cursorPos,
+  selection,
   isPaused,
 }: {
   gameMap: string;
   cursorPos: number;
+  selection: { start: number; end: number } | null;
   isPaused: boolean;
 }) {
   const characters = Array.from(gameMap);
@@ -185,17 +224,31 @@ function GameMap({
       className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
     >
       <style>{blinkAnimation}</style>
-      {characters.map((char, index) => (
-        <span key={index} className="relative">
-          {index === cursorPos && (
-            <span
-              className="absolute inset-0 h-full w-0.5 bg-white"
-              style={{ animation: cursorAnimation }}
-            />
-          )}
-          {char}
-        </span>
-      ))}
+      {characters.map((char, index) => {
+        const isSelected =
+          selection !== null &&
+          index >= selection.start &&
+          index < selection.end;
+        return (
+          <span
+            key={index}
+            className="relative"
+            style={
+              isSelected
+                ? { backgroundColor: "rgba(255, 255, 255, 0.4)" }
+                : undefined
+            }
+          >
+            {index === cursorPos && (
+              <span
+                className="absolute inset-0 h-full w-0.5 bg-white"
+                style={{ animation: cursorAnimation }}
+              />
+            )}
+            {char}
+          </span>
+        );
+      })}
       {cursorPos === characters.length && (
         <span className="relative">
           <span
@@ -204,6 +257,22 @@ function GameMap({
           />
         </span>
       )}
+    </pre>
+  );
+}
+
+function TargetMap({ text }: { text: string }) {
+  return (
+    <pre
+      style={{
+        minWidth: "544px",
+        backgroundImage: "radial-gradient(#7CA05B, #5E8043)",
+        fontFamily: "var(--font-noto-emoji), monospace",
+        fontSize: "1.2rem",
+      }}
+      className="font-mono whitespace-pre-wrap break-words relative text-white rounded-md m-2 p-3"
+    >
+      {text}
     </pre>
   );
 }

@@ -1,10 +1,10 @@
 import { levels } from "../levels";
 import {
   getActualInitialCursorPos,
-  getGermCount,
+  isLevelGoalReached,
   startContentToText,
 } from "../gameUtilities";
-import { calcTextarea } from "../virtualTextarea";
+import { calcTextarea, ITextareaState } from "../virtualTextarea";
 
 export type IKeyRecording = {
   level: number;
@@ -22,23 +22,33 @@ export function validateKeyRecording(keyRecording: IKeyRecording): boolean {
       return false;
     }
 
-    let text = startContentToText(level.startContent);
-    let cursorPos: number = getActualInitialCursorPos(
-      level.cursorStartPos,
-      level.startContent,
+    const allowedKeyCombinations = new Set(
+      level.allowedKeyCombinations.map((combination) => combination.join("+")),
     );
+
+    let textareaState: ITextareaState = {
+      text: startContentToText(level.startContent),
+      cursorPos: getActualInitialCursorPos(
+        level.cursorStartPos,
+        level.startContent,
+      ),
+      selectionAnchor: null,
+      clipboard: "",
+    };
     for (const pressedKey of levelRecording.pressedKeys) {
       if (pressedKey.timestamp < previousKeyDownTimestamp) {
         return false;
       }
       previousKeyDownTimestamp = pressedKey.timestamp;
 
-      const result = calcTextarea(cursorPos, text, pressedKey.keyCombination);
-      cursorPos = result.cursorPos;
-      text = result.text;
+      if (!allowedKeyCombinations.has(pressedKey.keyCombination.join("+"))) {
+        return false;
+      }
+
+      textareaState = calcTextarea(textareaState, pressedKey.keyCombination);
     }
 
-    if (getGermCount(text) > 0) {
+    if (!isLevelGoalReached(level, textareaState.text)) {
       return false;
     }
   }

@@ -9,6 +9,16 @@ export function ctrlEquivalentPressed(
 }
 
 /**
+ * The modifier used for clipboard combos (cut/copy/paste).
+ * On Mac this is Cmd, since Option+letter produces accented characters.
+ */
+export function clipboardModifierPressed(
+  event: KeyboardEvent | globalThis.KeyboardEvent,
+) {
+  return isMac() ? event.metaKey : event.ctrlKey;
+}
+
+/**
  * Call this function to assert that the code should never be reached.
  * For instance, in a switch statement, if all cases are handled, the default case should never be reached
  * @param value

@@ -5,22 +5,36 @@ function LevelResultsBar({ levelResults }: { levelResults: ILevelResult }) {
   const level = levelResults.currentLevel;
   return (
     <div className="flex gap-4">
+      {levelResults.levelTotalGerms > 0 && (
+        <>
+          <p
+            className="text-sm"
+            style={{
+              color: getDangerColor(
+                (levelResults.germs ?? 0) / levelResults.levelTotalGerms,
+              ),
+            }}
+          >
+            Germs: {levelResults.germs}/{levelResults.levelTotalGerms}
+          </p>
+          <p className="text-sm">+</p>
+        </>
+      )}
       <p
         className="text-sm"
         style={{
           color: getDangerColor(
-            (levelResults.germs ?? 0) / levelResults.levelTotalGerms,
-          ),
-        }}
-      >
-        Germs: {levelResults.germs}/{levelResults.levelTotalGerms}
-      </p>
-      <p className="text-sm">+</p>
-      <p
-        className="text-sm"
-        style={{
-          color: getDangerColor(
-            1 - (levelResults.animals ?? 0) / levelResults.levelTotalAnimals,
+            levelResults.levelTotalAnimals === 0
+              ? 1
+              : Math.max(
+                  0,
+                  Math.min(
+                    1,
+                    1 -
+                      (levelResults.animals ?? 0) /
+                        levelResults.levelTotalAnimals,
+                  ),
+                ),
           ),
         }}
       >
