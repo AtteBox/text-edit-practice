@@ -1,10 +1,10 @@
 import { execFileSync } from "node:child_process";
 
-// Create the highscore table in DynamoDB Local before the tests run
+// Start every run with an empty highscore table in DynamoDB Local
 export default function globalSetup() {
   execFileSync(
     process.execPath,
-    ["scripts/create-local-table.mjs", "test", "http://localhost:8000"],
-    { stdio: "inherit" },
+    ["scripts/create-local-table.mjs", "--recreate", "test"],
+    { stdio: "inherit", env: { ...process.env, NODE_ENV: "test" } },
   );
 }

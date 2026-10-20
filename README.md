@@ -61,7 +61,7 @@ To learn more about Next.js, take a look at the following resources:
 
 ### E2E Tests
 
-The game is tested using [Playwright](https://playwright.dev/). The tests are located in the `e2e-tests`-folder. They need DynamoDB Local running (`npm run db:start`); the test table is created automatically. In CI, DynamoDB Local runs as a service container, so no AWS credentials are needed. You can run the tests using:
+The game is tested using [Playwright](https://playwright.dev/). The tests are located in the `e2e-tests`-folder. They need DynamoDB Local running (`npm run db:start`); the test table is recreated empty at the start of each run. In CI, DynamoDB Local runs as a service container, so no AWS credentials are needed. You can run the tests using:
 
 ```bash
 npm run test:e2e

@@ -1,23 +1,81 @@
-// Creates the highscore table in DynamoDB Local. Safe to run repeatedly.
+// Creates the highscore tables in DynamoDB Local. Safe to run repeatedly.
 // Keep the table definition in sync with infra/infra.yaml.
 //
-// Usage: node scripts/create-local-table.mjs <instanceIdentifier> [endpoint]
+// Usage: node scripts/create-local-table.mjs [--recreate] <instanceIdentifier>...
+//
+// The endpoint is read from DYNAMODB_ENDPOINT, loaded from the .env files the
+// same way Next.js does (NODE_ENV=test loads .env.test, otherwise
+// .env.development). If it is empty, a real AWS table is used and nothing is
+// done.
+import nextEnv from "@next/env";
 import {
   CreateTableCommand,
+  DeleteTableCommand,
   DynamoDBClient,
+  ListTablesCommand,
   ResourceInUseException,
+  ResourceNotFoundException,
 } from "@aws-sdk/client-dynamodb";
 
-async function createLocalTable(
-  instanceIdentifier,
-  endpoint = "http://localhost:8000",
-) {
-  const client = new DynamoDBClient({
-    endpoint,
-    region: "local",
-    credentials: { accessKeyId: "local", secretAccessKey: "local" },
-  });
-  const tableName = `Typoterminator-HighScore-Table__${instanceIdentifier}`;
+nextEnv.loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "test");
+
+const args = process.argv.slice(2);
+const recreate = args.includes("--recreate");
+const instanceIdentifiers = args.filter((arg) => arg !== "--recreate");
+if (instanceIdentifiers.length === 0) {
+  console.error(
+    "Usage: node scripts/create-local-table.mjs [--recreate] <instanceIdentifier>...",
+  );
+  process.exit(1);
+}
+
+const endpoint = process.env.DYNAMODB_ENDPOINT;
+if (!endpoint) {
+  console.log("DYNAMODB_ENDPOINT is not set, skipping local table setup");
+  process.exit(0);
+}
+
+const client = new DynamoDBClient({
+  endpoint,
+  region: "local",
+  credentials: { accessKeyId: "local", secretAccessKey: "local" },
+});
+
+try {
+  await waitUntilReachable();
+  for (const instanceIdentifier of instanceIdentifiers) {
+    await createTable(`Typoterminator-HighScore-Table__${instanceIdentifier}`);
+  }
+} finally {
+  client.destroy();
+}
+
+// DynamoDB Local may still be starting up (e.g. as a CI service container)
+async function waitUntilReachable(timeoutMs = 30_000) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    try {
+      await client.send(new ListTablesCommand({}));
+      return;
+    } catch (error) {
+      if (Date.now() > deadline) {
+        throw new Error(`DynamoDB Local is not reachable at ${endpoint}`, {
+          cause: error,
+        });
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+async function createTable(tableName) {
+  if (recreate) {
+    try {
+      await client.send(new DeleteTableCommand({ TableName: tableName }));
+    } catch (error) {
+      if (!(error instanceof ResourceNotFoundException)) throw error;
+    }
+  }
   const throughput = { ReadCapacityUnits: 5, WriteCapacityUnits: 5 };
   try {
     await client.send(
@@ -50,16 +108,5 @@ async function createLocalTable(
   } catch (error) {
     if (!(error instanceof ResourceInUseException)) throw error;
     console.log(`Table ${tableName} already exists at ${endpoint}`);
-  } finally {
-    client.destroy();
   }
 }
-
-const [instanceIdentifier, endpoint] = process.argv.slice(2);
-if (!instanceIdentifier) {
-  console.error(
-    "Usage: node scripts/create-local-table.mjs <instanceIdentifier> [endpoint]",
-  );
-  process.exit(1);
-}
-await createLocalTable(instanceIdentifier, endpoint);
