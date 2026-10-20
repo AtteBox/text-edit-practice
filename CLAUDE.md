@@ -12,6 +12,8 @@ A web-based game for practicing text editing keyboard shortcuts. Players remove 
 
 ## Commands
 
+- `npm run db:start` / `npm run db:stop` — Start/stop DynamoDB Local (Docker, port 8000)
+- `npm run db:setup` — Create the `dev` and `test` highscore tables in DynamoDB Local
 - `npm run dev` — Start dev server
 - `npm test` — Run unit tests (Vitest)
 - `npm run e2e` — Run E2E tests (Playwright)
@@ -21,7 +23,7 @@ A web-based game for practicing text editing keyboard shortcuts. Players remove 
 ## Architecture
 
 - **Framework:** Next.js + React + TypeScript + Tailwind CSS
-- **Backend:** DynamoDB for highscores, API routes at `src/app/api/`
+- **Backend:** DynamoDB for highscores, API routes at `src/app/api/`. Dev and E2E (local + CI) use DynamoDB Local via `DYNAMODB_ENDPOINT`; the local table definition in `scripts/create-local-table.mjs` must match `infra/infra.yaml`
 - **Game engine:** Custom React hooks in `src/app/engines/` (game, level, history, highscore)
 - **Text engine:** `src/app/virtualTextarea/` — pure function handling cursor movement and text editing
 - **Levels:** Data-driven in `src/app/levels/index.ts`

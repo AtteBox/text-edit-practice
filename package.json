@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "db:setup": "node scripts/create-local-table.mjs dev test",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

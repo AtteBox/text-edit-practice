@@ -6,10 +6,17 @@ import { number } from "dynamodb-toolbox/schema/number";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-const config =
-  process.env.CUSTOM_AWS_ACCESS_KEY_ID &&
-  process.env.CUSTOM_AWS_SECRET_ACCESS_KEY &&
-  process.env.CUSTOM_AWS_REGION
+// When DYNAMODB_ENDPOINT is set (dev and e2e), use DynamoDB Local, which
+// accepts any credentials.
+const config = process.env.DYNAMODB_ENDPOINT
+  ? {
+      endpoint: process.env.DYNAMODB_ENDPOINT,
+      region: "local",
+      credentials: { accessKeyId: "local", secretAccessKey: "local" },
+    }
+  : process.env.CUSTOM_AWS_ACCESS_KEY_ID &&
+      process.env.CUSTOM_AWS_SECRET_ACCESS_KEY &&
+      process.env.CUSTOM_AWS_REGION
     ? {
         credentials: {
           accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID!,
