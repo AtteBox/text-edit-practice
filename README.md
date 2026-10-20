@@ -25,10 +25,20 @@ The main-branch is automatically being deployed here: https://typoterminator.net
 Prerequisites:
 
 - Node.js > 20
+- Docker (for [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), which stores the highscores in development and tests)
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-First, run the development server:
+First, start DynamoDB Local and create the highscore tables (data persists in a Docker volume, so `db:setup` is only needed once):
+
+```bash
+npm run db:start
+npm run db:setup
+```
+
+To use a real AWS DynamoDB table instead, override `DYNAMODB_ENDPOINT=` (empty) in a `.env.development.local` file.
+
+Then run the development server:
 
 ```bash
 npm run dev
@@ -51,7 +61,7 @@ To learn more about Next.js, take a look at the following resources:
 
 ### E2E Tests
 
-The game is tested using [Playwright](https://playwright.dev/). The tests are located in the `e2e-tests`-folder. You can run the tests using:
+The game is tested using [Playwright](https://playwright.dev/). The tests are located in the `e2e-tests`-folder. They need DynamoDB Local running (`npm run db:start`); the test table is created automatically. In CI, DynamoDB Local runs as a service container, so no AWS credentials are needed. You can run the tests using:
 
 ```bash
 npm run test:e2e
