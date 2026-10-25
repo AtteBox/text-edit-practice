@@ -21,12 +21,9 @@ export function createRandomGameHistory(): IGameHistory {
 }
 
 function mapToVirtualTextareaKeyCombination(keyCombination: string): string[] {
-  const keys = keyCombination.split("+");
-  if (keys.length === 1) {
-    return [keys[0]];
-  }
-  if (keys.length === 2) {
-    return [keys[0].replace("Control", "ctrl"), keys[1]];
-  }
-  return [];
+  return keyCombination
+    .split("+")
+    .map((key) =>
+      key === "Control" ? "ctrl" : key === "Shift" ? "shift" : key,
+    );
 }
