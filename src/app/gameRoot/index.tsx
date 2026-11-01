@@ -51,19 +51,24 @@ function Screen({
   game: IGameEngineResult;
   gameHistory: IGameHistory;
 }) {
-  const [showLevelScreen, setShowLevelScreen] = useState(true);
+  const [levelResultsDelayElapsed, setLevelResultsDelayElapsed] =
+    useState(false);
 
   // Delay showing the level results screen for a second to make the transition smoother
   useEffect(() => {
     if (game.levelFinished) {
-      setTimeout(() => {
-        setShowLevelScreen(false);
+      const timeout = setTimeout(() => {
+        setLevelResultsDelayElapsed(true);
       }, 1000);
-    } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowLevelScreen(true);
+      return () => clearTimeout(timeout);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLevelResultsDelayElapsed(false);
   }, [game.levelFinished]);
+
+  // Show the next level in the same render that starts it, so its key
+  // listener is attached before the player sees it
+  const showLevelScreen = !game.levelFinished || !levelResultsDelayElapsed;
 
   if (!game.gameHasStarted) {
     return <StartScreen game={game} />;
