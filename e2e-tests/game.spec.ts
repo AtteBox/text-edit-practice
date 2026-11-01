@@ -225,20 +225,14 @@ async function startGame(page: Page) {
   }).toPass({ timeout: 15000 });
 }
 
-const isMacByPage = new WeakMap<Page, Promise<boolean>>();
-
 /**
  * Presses a key in the game textarea
  * @param gameElement
  * @param key key to press
  */
 async function pressGameKey(page: Page, key: string) {
-  let mac = isMacByPage.get(page);
-  if (mac === undefined) {
-    mac = isMac(page);
-    isMacByPage.set(page, mac);
-  }
-  await page.keyboard.press((await mac) ? key.replace("Control", "Alt") : key);
+  const mac = await isMac(page);
+  await page.keyboard.press(mac ? key.replace("Control", "Alt") : key);
 }
 
 /**
