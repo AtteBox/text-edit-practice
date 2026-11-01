@@ -21,7 +21,11 @@ export function useLevelEngine({
   const [currentKeyCombination, setCurrentKeyCombination] = useState<
     string[] | null
   >(null);
-  const [cursorPos, setCursorPos] = useState<number>(0);
+  // Start at the level's cursor position right away, so keys pressed before
+  // the reset effect below has run are not applied at position 0
+  const [cursorPos, setCursorPos] = useState<number>(() =>
+    getActualInitialCursorPos(level.cursorStartPos, level.startContent),
+  );
 
   //when level changes, reset the game map
   useEffect(() => {
