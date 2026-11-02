@@ -44,9 +44,7 @@ test("when played through first level, show level results", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.fill("input", "Test User");
-  await page.getByRole("button", { name: "Start Game" }).click();
-  await expect(page.getByText("Level 1")).toBeVisible();
+  await startGame(page);
   for (const key of keysByLevel[0]) {
     await pressGameKey(page, key);
   }
@@ -72,9 +70,7 @@ test("when played through first level with too many mistakes, show level failed 
   page,
 }) => {
   await page.goto("/");
-  await page.fill("input", "Test User");
-  await page.getByRole("button", { name: "Start Game" }).click();
-  await expect(page.getByText("Level 1")).toBeVisible();
+  await startGame(page);
   for (const key of level1FailKeys) {
     await pressGameKey(page, key);
   }
@@ -97,9 +93,10 @@ test("when played through last level with too many mistakes, show level failed m
   browserName,
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
+  // Plays through all levels, which can exceed the default timeout on slower browsers
+  test.slow();
   await page.goto("/");
-  await page.fill("input", "Test User");
-  await page.getByRole("button", { name: "Start Game" }).click();
+  await startGame(page);
   for (let i = 0; i < keysByLevel.length; i++) {
     const isLastLevel = i === keysByLevel.length - 1;
     const levelKeys = isLastLevel ? level5FailKeys : keysByLevel[i];
@@ -124,9 +121,10 @@ test("when played through the game, show finished game view and calculate total 
   browserName,
 }) => {
   test.skip(browserName === "webkit", "TODO: Still working on it");
+  // Plays through all levels, which can exceed the default timeout on slower browsers
+  test.slow();
   await page.goto("/");
-  await page.fill("input", "Test User");
-  await page.getByRole("button", { name: "Start Game" }).click();
+  await startGame(page);
   let totalPoints = 0;
   for (let i = 0; i < keysByLevel.length; i++) {
     const isLastLevel = i === keysByLevel.length - 1;
@@ -164,9 +162,7 @@ test("when playing a level, user can pause and resume the game", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.fill("input", "Test User");
-  await page.getByRole("button", { name: "Start Game" }).click();
-  await expect(page.getByText("Level 1")).toBeVisible();
+  await startGame(page);
 
   // Play a few keys to start the game
   const initialKeys = keysByLevel[0].slice(0, 5);
@@ -213,6 +209,21 @@ test("when playing a level, user can pause and resume the game", async ({
   const finalPoints = await extractPoints(page);
   expect(finalPoints).toBeGreaterThan(pointsBeforePause);
 });
+
+/**
+ * Enters a username and starts the game, retrying until the first level is
+ * shown. Text filled before React has hydrated the start screen never reaches
+ * the component state, so the first click can fail username validation on a
+ * slow dev server (seen mostly on WebKit in CI).
+ * @param page
+ */
+async function startGame(page: Page) {
+  await expect(async () => {
+    await page.fill("input", "Test User");
+    await page.getByRole("button", { name: "Start Game" }).click();
+    await expect(page.getByText("Level 1")).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+}
 
 /**
  * Presses a key in the game textarea
