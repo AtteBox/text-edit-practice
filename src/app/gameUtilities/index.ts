@@ -92,7 +92,6 @@ type ILevelState = {
   animals?: number;
   startTime: number;
   elapsedTime: number;
-  levelFinished: boolean;
   isPaused: boolean;
   gamePauses: { startTime: number; endTime?: number }[];
 };

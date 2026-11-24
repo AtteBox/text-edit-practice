@@ -45,15 +45,16 @@ export function useGameEngine({
     elapsedTime: 0,
     previousLevels: [],
     gameHasStarted: false,
-    levelFinished: false,
     isPaused: false,
     gamePauses: [],
   });
   const level = levels[gameState.currentLevel - 1];
 
   const isLastLevel = gameState.currentLevel === levels.length;
-  const levelFailed =
-    !!gameState.levelFinished && calcPoints(gameState, level) <= 0;
+  // Derived rather than stored: a level is finished once all germs are gone.
+  // `germs` is undefined until the first stats update of a level.
+  const levelFinished = gameState.germs === 0;
+  const levelFailed = levelFinished && calcPoints(gameState, level) <= 0;
 
   const totalPauseDuration = useMemo(
     () =>
@@ -80,7 +81,6 @@ export function useGameEngine({
   const startNextLevel = useCallback(() => {
     setGameState((state) => ({
       ...state,
-      levelFinished: false,
       germs: undefined,
       animals: undefined,
       startTime: Date.now(),
@@ -96,7 +96,6 @@ export function useGameEngine({
           animals: state.animals,
           startTime: state.startTime,
           elapsedTime: state.elapsedTime,
-          levelFinished: true,
           isPaused: false,
           gamePauses: state.gamePauses,
         },
@@ -216,18 +215,12 @@ export function useGameEngine({
     [gameState.previousLevels, levels],
   );
 
-  const isGameFinished = isLastLevel && gameState.levelFinished;
-
-  useEffect(() => {
-    if (gameState.germs === 0) {
-      updateGameState({ levelFinished: true });
-    }
-  }, [gameState.germs, updateGameState]);
+  const isGameFinished = isLastLevel && levelFinished;
 
   useEffect(() => {
     if (
       gameState.gameHasStarted &&
-      !gameState.levelFinished &&
+      !levelFinished &&
       !gameState.isPaused
     ) {
       const interval = setInterval(() => {
@@ -237,7 +230,7 @@ export function useGameEngine({
     }
   }, [
     updateGameState,
-    gameState.levelFinished,
+    levelFinished,
     gameState.gameHasStarted,
     gameState.isPaused,
   ]);
@@ -259,7 +252,7 @@ export function useGameEngine({
     animals: gameState.animals ?? levelTotalAnimals,
     elapsedTime: gameState.elapsedTime,
     gameHasStarted: gameState.gameHasStarted,
-    levelFinished: gameState.levelFinished,
+    levelFinished,
     previousLevels,
     username: gameState.username,
     isGameFinished,
